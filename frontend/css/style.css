@@ -488,7 +488,7 @@ nav button.btn-gold {
 /* TRANSFER PAGE */
 #transfer-page { padding: 24px; max-width: 1200px; margin: 0 auto; }
 
-.teams-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+.teams-grid { display: block; }
 
 .team-card {
     background: var(--card);
