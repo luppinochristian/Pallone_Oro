@@ -1,0 +1,14 @@
+{
+  "name": "Golden Striker",
+  "image": "mcr.microsoft.com/devcontainers/php:8.2-bullseye",
+  "features": {
+    "ghcr.io/devcontainers/features/mysql:1": {
+      "version": "latest"
+    }
+  },
+  "postCreateCommand": "sudo service mysql start && mysql -u root < backend/config/schema.sql || true",
+  "forwardPorts": [8080],
+  "portsAttributes": {
+    "8080": { "label": "Golden Striker", "onAutoForward": "openBrowser" }
+  }
+}
