@@ -89,10 +89,13 @@ nav button.btn-gold {
 /* AUTH */
 #auth-page {
     min-height: 100vh;
-    display: flex;
     align-items: center;
     justify-content: center;
     background: radial-gradient(ellipse at center, #1a1a3e 0%, #0a0e1a 70%);
+}
+
+#auth-page.active {
+    display: flex;
 }
 
 .auth-container {
