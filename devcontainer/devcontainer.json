@@ -6,7 +6,10 @@
       "version": "latest"
     }
   },
-  "postCreateCommand": "sudo service mysql start && mysql -u root < backend/config/schema.sql || true",
+  "postCreateCommand": "sudo service mysql start && mysql -u root < backend/config/schema.sql || true && echo 'export PATH=/usr/local/bin:$PATH' >> ~/.bashrc",
+  "remoteEnv": {
+    "PATH": "/usr/local/bin:/usr/bin:/bin"
+  },
   "forwardPorts": [8080],
   "portsAttributes": {
     "8080": { "label": "Golden Striker", "onAutoForward": "openBrowser" }
