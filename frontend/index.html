@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Golden Striker – Road to the Pallone d'Oro</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚽</text></svg>">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- HEADER -->
+<header id="main-header">
+    <div class="logo">
+        <span class="icon">⚽</span>
+        <div>
+            <h1>GOLDEN STRIKER</h1>
+            <p>Road to the Pallone d'Oro</p>
+        </div>
+    </div>
+    <nav id="main-nav" style="display:none">
+        <button data-page="dashboard">🏠 Dashboard</button>
+        <button data-page="game">⚽ Gioca</button>
+        <button data-page="career">📊 Carriera</button>
+        <button data-page="transfer">🔄 Trasferimento</button>
+        <button data-page="strutture">🏗️ Strutture</button>
+        <button data-page="classifica">🏟️ Classifica</button>
+        <button data-page="agente">🤝 Agente</button>
+        <button data-page="notizie" id="nav-notizie">📰 Notizie</button>
+        <button id="logout-btn" class="btn-gold">Esci</button>
+    </nav>
+</header>
+
+<!-- ========== AUTH PAGE ========== -->
+<div id="auth-page" class="page active">
+    <div id="auth-page-inner">
+        <div class="auth-container">
+            <div class="auth-box">
+                <div class="auth-logo">
+                    <span class="ball">⚽</span>
+                    <h1>GOLDEN STRIKER</h1>
+                    <p>ROAD TO THE PALLONE D'ORO</p>
+                </div>
+
+                <div class="auth-tabs">
+                    <button class="auth-tab active" data-tab="login">Accedi</button>
+                    <button class="auth-tab" data-tab="register">Nuova Carriera</button>
+                </div>
+
+                <!-- Login -->
+                <form id="login-form">
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" id="l-username" placeholder="Il tuo username" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="l-password" placeholder="Password" required>
+                    </div>
+                    <p class="error-msg" id="login-error"></p>
+                    <button type="submit" class="btn-primary">⚽ Accedi alla Carriera</button>
+                </form>
+
+                <!-- Register -->
+                <form id="register-form" style="display:none">
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" id="r-username" placeholder="Scegli un username" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" id="r-password" placeholder="Scegli una password" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Nome Calciatore</label>
+                        <input type="text" id="r-name" placeholder="es. Marco Rossi" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Sesso</label>
+                            <select id="r-gender">
+                                <option value="male">Maschio</option>
+                                <option value="female">Femmina</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Età iniziale</label>
+                            <select id="r-age">
+                                <option value="16">16 anni</option>
+                                <option value="17" selected>17 anni</option>
+                                <option value="18">18 anni</option>
+                                <option value="19">19 anni</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Nazionalità</label>
+                        <select id="r-nationality">
+                            <option>Italy</option>
+                            <option>Brazil</option>
+                            <option>Argentina</option>
+                            <option>France</option>
+                            <option>Spain</option>
+                            <option>Germany</option>
+                            <option>Portugal</option>
+                            <option>England</option>
+                            <option>Netherlands</option>
+                        </select>
+                    </div>
+                    <p class="error-msg" id="register-error"></p>
+                    <button type="submit" class="btn-primary">🌟 Inizia la Carriera</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========== DASHBOARD PAGE ========== -->
+<div id="dashboard-page" class="page">
+    <div style="padding:24px;max-width:1400px;margin:0 auto">
+
+        <!-- Hero -->
+        <div class="player-hero">
+            <div class="player-avatar">
+                <span id="player-avatar-icon">👦</span>
+            </div>
+            <div class="player-info">
+                <h2 id="player-name-display">-</h2>
+                <div class="subtitle" id="player-subtitle">-</div>
+                <div class="team-badge">🏟️ <span id="player-team">-</span></div>
+            </div>
+            <div class="player-overall">
+                <div class="overall-circle" id="overall-circle">
+                    <span class="overall-value" id="overall-value">-</span>
+                </div>
+                <div class="overall-label">Overall</div>
+            </div>
+        </div>
+
+        <!-- Info Cards -->
+        <div class="info-cards">
+            <div class="info-card">
+                <div class="val" id="info-mese">-</div>
+                <div class="lbl">Periodo</div>
+            </div>
+            <div class="info-card">
+                <div class="val" id="info-soldi">-</div>
+                <div class="lbl">Soldi</div>
+            </div>
+            <div class="info-card">
+                <div class="val" id="info-gol">-</div>
+                <div class="lbl">Gol Carriera</div>
+            </div>
+            <div class="info-card">
+                <div class="val" id="info-assist">-</div>
+                <div class="lbl">Assist Carriera</div>
+            </div>
+            <div class="info-card">
+                <div class="val" id="info-palloni">-</div>
+                <div class="lbl">🏆 Palloni d'Oro</div>
+            </div>
+            <div class="info-card">
+                <div class="val" id="info-struttura">-</div>
+                <div class="lbl">Struttura</div>
+            </div>
+        </div>
+
+        <!-- Obiettivi Stagionali -->
+        <div id="dashboard-obiettivi" style="margin-bottom:20px"></div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <!-- Technical Stats -->
+            <div class="stat-card">
+                <h3>📊 Statistiche Tecniche</h3>
+                <div class="stat-row" data-stat="tiro">
+                    <span class="stat-name">Tiro</span>
+                    <div class="stat-bar-bg"><div class="stat-bar" style="width:0%"></div></div>
+                    <span class="stat-value">0</span>
+                </div>
+                <div class="stat-row" data-stat="velocita">
+                    <span class="stat-name">Velocità</span>
+                    <div class="stat-bar-bg"><div class="stat-bar" style="width:0%"></div></div>
+                    <span class="stat-value">0</span>
+                </div>
+                <div class="stat-row" data-stat="dribbling">
+                    <span class="stat-name">Dribbling</span>
+                    <div class="stat-bar-bg"><div class="stat-bar" style="width:0%"></div></div>
+                    <span class="stat-value">0</span>
+                </div>
+                <div class="stat-row" data-stat="fisico">
+                    <span class="stat-name">Fisico</span>
+                    <div class="stat-bar-bg"><div class="stat-bar" style="width:0%"></div></div>
+                    <span class="stat-value">0</span>
+                </div>
+                <div class="stat-row" data-stat="mentalita">
+                    <span class="stat-name">Mentalità</span>
+                    <div class="stat-bar-bg"><div class="stat-bar" style="width:0%"></div></div>
+                    <span class="stat-value">0</span>
+                </div>
+            </div>
+
+            <!-- Condizione -->
+            <div class="stat-card">
+                <h3>🔋 Condizione Fisica</h3>
+                <div class="stat-row bar-green" data-special="energia">
+                    <span class="stat-name">Energia</span>
+                    <div class="stat-bar-bg"><div class="stat-bar" style="width:0%"></div></div>
+                    <span class="stat-value">0</span>
+                </div>
+                <div class="stat-row bar-blue" data-special="morale">
+                    <span class="stat-name">Morale</span>
+                    <div class="stat-bar-bg"><div class="stat-bar" style="width:0%"></div></div>
+                    <span class="stat-value">0</span>
+                </div>
+                <div class="stat-row bar-purple" data-special="popolarita">
+                    <span class="stat-name">Popolarità</span>
+                    <div class="stat-bar-bg"><div class="stat-bar" style="width:0%"></div></div>
+                    <span class="stat-value">0</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- ========== GAME PAGE ========== -->
+<div id="game-page" class="page">
+    <div id="game-page-inner" style="padding:24px;max-width:1400px;margin:0 auto">
+        <div class="page-title">⚽ Gioca il <span>Mese</span></div>
+        <p class="page-subtitle">Scegli fino a 3 azioni per questo mese, poi simula le partite</p>
+
+        <!-- Month indicator -->
+        <div class="month-indicator">
+            <div class="month-dots" id="month-dots"></div>
+            <span id="current-month-text" style="font-size:0.9rem;color:var(--text-dim)"></span>
+        </div>
+
+        <div class="game-layout">
+            <!-- Actions -->
+            <div class="actions-panel">
+                <h3>🎯 Scegli le tue Azioni</h3>
+                <p>Seleziona 1-3 azioni mensili. Le scelte influenzano stats, energia e performance in partita.</p>
+                <div class="actions-grid" id="actions-grid"></div>
+                <button class="play-btn" id="play-month-btn" disabled>⚽ Seleziona azioni</button>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="game-sidebar">
+                <div class="sidebar-card">
+                    <h4>📈 Status Attuale</h4>
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+                        <div class="info-card" style="padding:12px">
+                            <div class="val" id="g-overall">-</div>
+                            <div class="lbl">Overall</div>
+                        </div>
+                        <div class="info-card" style="padding:12px">
+                            <div class="val" id="g-energia">-</div>
+                            <div class="lbl">Energia</div>
+                        </div>
+                        <div class="info-card" style="padding:12px">
+                            <div class="val" id="g-morale">-</div>
+                            <div class="lbl">Morale</div>
+                        </div>
+                        <div class="info-card" style="padding:12px">
+                            <div class="val" id="g-soldi">-</div>
+                            <div class="lbl">Soldi</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-card">
+                    <h4>📋 Ultime Attività</h4>
+                    <ul class="log-list" id="recent-log">
+                        <li class="log-item" style="color:var(--text-dim)">Caricamento...</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========== CAREER PAGE ========== -->
+<div id="career-page" class="page">
+    <div style="padding:24px;max-width:1200px;margin:0 auto">
+        <div class="page-title">📊 <span>Carriera</span></div>
+        <p class="page-subtitle">Storico delle tue stagioni e posizioni al Pallone d'Oro</p>
+
+        <table class="season-table">
+            <thead>
+                <tr>
+                    <th>Stagione</th>
+                    <th>⚽ Gol</th>
+                    <th>🎯 Assist</th>
+                    <th>🏟️ Partite</th>
+                    <th>⭐ Media Voto</th>
+                    <th>🏆 Pallone d'Oro</th>
+                </tr>
+            </thead>
+            <tbody id="season-table-body">
+                <tr><td colspan="7" class="loading">Caricamento</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ========== TRANSFER PAGE ========== -->
+<div id="transfer-page" class="page">
+    <div style="padding:24px;max-width:1200px;margin:0 auto">
+        <div class="page-title">🔄 <span>Trasferimento</span></div>
+        <p class="page-subtitle">Scegli la tua prossima squadra. Squadre migliori = più soldi e visibilità!</p>
+        <div class="teams-grid" id="teams-grid">
+            <p class="loading">Caricamento squadre</p>
+        </div>
+    </div>
+</div>
+
+<!-- ========== STRUTTURE PAGE ========== -->
+<div id="strutture-page" class="page">
+    <div style="padding:24px;max-width:900px;margin:0 auto">
+        <div class="page-title">🏗️ <span>Struttura Personale</span></div>
+        <p class="page-subtitle">Investi i tuoi soldi per migliorare la tua struttura di allenamento e crescere più velocemente.</p>
+        <div id="strutture-container">
+            <p class="loading">Caricamento</p>
+        </div>
+    </div>
+</div>
+
+<!-- ========== CLASSIFICA PAGE ========== -->
+<div id="classifica-page" class="page">
+    <div style="padding:24px;max-width:1200px;margin:0 auto">
+        <div class="page-title">🏟️ <span>Classifica</span></div>
+        <p class="page-subtitle">Classifica in tempo reale di ogni lega e Champions Cup</p>
+
+        <div class="classifica-tabs">
+            <button class="class-tab active" onclick="switchClassTab('lega')">📋 Lega</button>
+            <button class="class-tab" onclick="switchClassTab('champions')">🏆 Champions Cup</button>
+        </div>
+
+        <!-- TAB LEGA -->
+        <div id="class-tab-lega">
+            <div class="lega-filters" id="classifica-lega-filters">
+                <p class="loading">Caricamento leghe...</p>
+            </div>
+            <div id="classifica-table-wrap">
+                <p class="loading">Seleziona una lega</p>
+            </div>
+        </div>
+
+        <!-- TAB CHAMPIONS -->
+        <div id="class-tab-champions" style="display:none">
+            <div id="champions-wrap">
+                <p class="loading">Caricamento Champions Cup...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========== AGENTE PAGE ========== -->
+<div id="agente-page" class="page">
+    <div style="padding:24px;max-width:900px;margin:0 auto">
+        <div class="page-title">🤝 <span>Agente Personale</span></div>
+        <p class="page-subtitle">Un buon agente negozia stipendi migliori e porta offerte dai top club</p>
+        <div id="agente-current" style="margin-bottom:24px"></div>
+        <div id="agente-lista"></div>
+    </div>
+</div>
+
+<!-- ========== NOTIZIE PAGE ========== -->
+<div id="notizie-page" class="page">
+    <div style="padding:24px;max-width:900px;margin:0 auto">
+        <div class="page-title">📰 <span>Notizie</span></div>
+        <p class="page-subtitle">Gli ultimi aggiornamenti sulla tua carriera</p>
+        <div id="notizie-lista"></div>
+    </div>
+</div>
+
+<!-- ========== RESULTS MODAL ========== -->
+<div class="modal-overlay" id="results-modal">
+    <div class="modal">
+        <h3>📊 Risultati del Mese</h3>
+        <ul class="result-list" id="results-list"></ul>
+        <button class="modal-close" id="close-results">✅ Continua</button>
+    </div>
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
