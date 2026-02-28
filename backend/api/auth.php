@@ -100,7 +100,7 @@ function requestReset($data){
  */
 function sendGmailSMTP($to, $subject, $body) {
     $from     = 'goldenstrikerreset@gmail.com';
-    $fromPass = 'GoldenStriker..'; // <-- Sostituisci con App Password Google (16 char)
+    $fromPass = 'rqma hcgx amhg obcy'; // <-- Sostituisci con App Password Google (16 char)
     $fromName = 'Golden Striker';
 
     // --- Prova PHPMailer se presente ---
