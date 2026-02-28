@@ -8,16 +8,284 @@ let authToken  = localStorage.getItem('gs_token')    || null;
 let currentCareerId = parseInt(localStorage.getItem('gs_career') || '0') || null;
 let selectedSkin = 'medium';
 let selectedEye  = 'brown';
+let selectedHair = 'short_black';
+
+// ========================
+// HAIR DEFINITIONS (stili capelli con SVG miniatura)
+// ========================
+const HAIR_STYLES = [
+    { id: 'short_black',    label: 'Corto Nero',     color: '#1a1a1a' },
+    { id: 'short_brown',    label: 'Corto Cast.',    color: '#5c3317' },
+    { id: 'short_blonde',   label: 'Corto Biondo',   color: '#D4A017' },
+    { id: 'short_red',      label: 'Corto Rosso',    color: '#8B2500' },
+    { id: 'medium_black',   label: 'Medio Nero',     color: '#1a1a1a' },
+    { id: 'medium_brown',   label: 'Medio Cast.',    color: '#5c3317' },
+    { id: 'medium_blonde',  label: 'Medio Biondo',   color: '#D4A017' },
+    { id: 'long_black',     label: 'Lungo Nero',     color: '#1a1a1a' },
+    { id: 'long_brown',     label: 'Lungo Cast.',    color: '#5c3317' },
+    { id: 'long_blonde',    label: 'Lungo Biondo',   color: '#D4A017' },
+    { id: 'curly_black',    label: 'Ricci Neri',     color: '#1a1a1a' },
+    { id: 'curly_brown',    label: 'Ricci Cast.',    color: '#5c3317' },
+    { id: 'afro_black',     label: 'Afro Nero',      color: '#1a1a1a' },
+    { id: 'afro_brown',     label: 'Afro Cast.',     color: '#5c3317' },
+    { id: 'mohawk_black',   label: 'Mohawk Nero',    color: '#1a1a1a' },
+    { id: 'mohawk_blonde',  label: 'Mohawk Biondo',  color: '#D4A017' },
+    { id: 'bun_black',      label: 'Coda Nera',      color: '#1a1a1a' },
+    { id: 'bun_brown',      label: 'Coda Cast.',     color: '#5c3317' },
+    { id: 'bald',           label: 'Rasato',         color: null },
+    { id: 'short_gray',     label: 'Grigio',         color: '#9ca3af' },
+];
+
+const SKIN_COLORS = {
+    light:'#FDDBB4', medium_light:'#E8B88A', medium:'#C68642',
+    medium_dark:'#8D5524', dark:'#3B1A08'
+};
+const EYE_COLORS = {
+    brown:'#5C3317', blue:'#1E90FF', green:'#228B22',
+    hazel:'#8B6914', gray:'#708090'
+};
+
+// Funzione SVG per miniatura capelli nel picker
+function hairSwatchSVG(hairId, hairColor, size = 36) {
+    const s = size;
+    const cx = s / 2;
+    const isBald = hairId === 'bald';
+    const skin = '#C68642'; // neutral skin for preview
+
+    let hairSVG = '';
+    if (!isBald && hairColor) {
+        const hc = hairColor;
+        if (hairId.startsWith('afro')) {
+            hairSVG = `<ellipse cx="${cx}" cy="${s*0.30}" rx="${s*0.30}" ry="${s*0.27}" fill="${hc}"/>`;
+        } else if (hairId.startsWith('long')) {
+            // Long hair: top cap + two side curtains flowing down
+            hairSVG = `
+                <rect x="${s*0.22}" y="${s*0.04}" width="${s*0.56}" height="${s*0.22}" rx="${s*0.11}" fill="${hc}"/>
+                <rect x="${s*0.10}" y="${s*0.16}" width="${s*0.13}" height="${s*0.68}" rx="${s*0.06}" fill="${hc}"/>
+                <rect x="${s*0.77}" y="${s*0.16}" width="${s*0.13}" height="${s*0.68}" rx="${s*0.06}" fill="${hc}"/>
+                <path d="M${s*0.10} ${s*0.82} Q${s*0.22} ${s*0.95} ${s*0.50} ${s*0.95} Q${s*0.78} ${s*0.95} ${s*0.90} ${s*0.82}" fill="${hc}" stroke="none"/>
+            `;
+        } else if (hairId.startsWith('medium')) {
+            hairSVG = `
+                <rect x="${s*0.24}" y="${s*0.05}" width="${s*0.52}" height="${s*0.19}" rx="${s*0.09}" fill="${hc}"/>
+                <rect x="${s*0.13}" y="${s*0.14}" width="${s*0.11}" height="${s*0.42}" rx="${s*0.05}" fill="${hc}"/>
+                <rect x="${s*0.76}" y="${s*0.14}" width="${s*0.11}" height="${s*0.42}" rx="${s*0.05}" fill="${hc}"/>
+            `;
+        } else if (hairId.startsWith('curly')) {
+            hairSVG = `
+                <ellipse cx="${cx}" cy="${s*0.18}" rx="${s*0.26}" ry="${s*0.16}" fill="${hc}"/>
+                <circle cx="${s*0.20}" cy="${s*0.28}" r="${s*0.10}" fill="${hc}"/>
+                <circle cx="${s*0.80}" cy="${s*0.28}" r="${s*0.10}" fill="${hc}"/>
+                <circle cx="${s*0.34}" cy="${s*0.14}" r="${s*0.09}" fill="${hc}"/>
+                <circle cx="${s*0.66}" cy="${s*0.14}" r="${s*0.09}" fill="${hc}"/>
+            `;
+        } else if (hairId.startsWith('mohawk')) {
+            hairSVG = `
+                <rect x="${s*0.40}" y="${s*0.02}" width="${s*0.20}" height="${s*0.30}" rx="${s*0.06}" fill="${hc}"/>
+                <rect x="${s*0.24}" y="${s*0.12}" width="${s*0.52}" height="${s*0.10}" rx="${s*0.05}" fill="${hc}"/>
+            `;
+        } else if (hairId.startsWith('bun')) {
+            hairSVG = `
+                <rect x="${s*0.26}" y="${s*0.05}" width="${s*0.48}" height="${s*0.16}" rx="${s*0.08}" fill="${hc}"/>
+                <circle cx="${cx}" cy="${s*0.08}" r="${s*0.13}" fill="${hc}"/>
+                <rect x="${s*0.36}" y="${s*0.18}" width="${s*0.28}" height="${s*0.10}" rx="${s*0.04}" fill="${hc}"/>
+            `;
+        } else if (hairId === 'short_gray') {
+            hairSVG = `<rect x="${s*0.28}" y="${s*0.04}" width="${s*0.44}" height="${s*0.20}" rx="${s*0.10}" fill="${hc}"/>`;
+        } else {
+            // short default
+            hairSVG = `<rect x="${s*0.28}" y="${s*0.04}" width="${s*0.44}" height="${s*0.20}" rx="${s*0.10}" fill="${hc}"/>`;
+        }
+    }
+
+    return `<svg viewBox="0 0 ${s} ${s}" width="${s}" height="${s}" xmlns="http://www.w3.org/2000/svg">
+        <!-- Face -->
+        <ellipse cx="${cx}" cy="${s*0.55}" rx="${s*0.28}" ry="${s*0.30}" fill="${skin}"/>
+        ${hairSVG}
+        <!-- Eyes -->
+        <circle cx="${s*0.41}" cy="${s*0.50}" r="${s*0.04}" fill="#333"/>
+        <circle cx="${s*0.59}" cy="${s*0.50}" r="${s*0.04}" fill="#333"/>
+        <!-- Mouth -->
+        <path d="M${s*0.41} ${s*0.65} Q${cx} ${s*0.70} ${s*0.59} ${s*0.65}" stroke="#c0706c" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+    </svg>`;
+}
+
+// ========================
+// AVATAR SVG COMPLETO
+// ========================
+function hairSVGFull(hairId, hairColor, gender, size) {
+    const s = size;
+    const cx = s / 2;
+    const isBald = hairId === 'bald';
+    const hc = hairColor;
+    if (isBald || !hc) return '';
+
+    if (hairId.startsWith('afro')) {
+        return `<ellipse cx="${cx}" cy="${s*0.30}" rx="${s*0.30}" ry="${s*0.27}" fill="${hc}" opacity="0.95"/>`;
+    }
+    if (hairId.startsWith('long')) {
+        return `
+            <rect x="${s*0.26}" y="${s*0.10}" width="${s*0.48}" height="${s*0.18}" rx="${s*0.09}" fill="${hc}"/>
+            <rect x="${s*0.14}" y="${s*0.20}" width="${s*0.14}" height="${s*0.58}" rx="${s*0.07}" fill="${hc}"/>
+            <rect x="${s*0.72}" y="${s*0.20}" width="${s*0.14}" height="${s*0.58}" rx="${s*0.07}" fill="${hc}"/>
+            <path d="M${s*0.14} ${s*0.76} Q${s*0.28} ${s*0.90} ${cx} ${s*0.90} Q${s*0.72} ${s*0.90} ${s*0.86} ${s*0.76}" fill="${hc}"/>
+        `;
+    }
+    if (hairId.startsWith('medium')) {
+        return `
+            <rect x="${s*0.26}" y="${s*0.12}" width="${s*0.48}" height="${s*0.17}" rx="${s*0.08}" fill="${hc}"/>
+            <rect x="${s*0.16}" y="${s*0.21}" width="${s*0.12}" height="${s*0.38}" rx="${s*0.06}" fill="${hc}"/>
+            <rect x="${s*0.72}" y="${s*0.21}" width="${s*0.12}" height="${s*0.38}" rx="${s*0.06}" fill="${hc}"/>
+        `;
+    }
+    if (hairId.startsWith('curly')) {
+        return `
+            <ellipse cx="${cx}" cy="${s*0.22}" rx="${s*0.26}" ry="${s*0.16}" fill="${hc}"/>
+            <circle cx="${s*0.22}" cy="${s*0.30}" r="${s*0.12}" fill="${hc}"/>
+            <circle cx="${s*0.78}" cy="${s*0.30}" r="${s*0.12}" fill="${hc}"/>
+            <circle cx="${s*0.36}" cy="${s*0.16}" r="${s*0.11}" fill="${hc}"/>
+            <circle cx="${s*0.64}" cy="${s*0.16}" r="${s*0.11}" fill="${hc}"/>
+        `;
+    }
+    if (hairId.startsWith('mohawk')) {
+        return `
+            <rect x="${s*0.42}" y="${s*0.02}" width="${s*0.16}" height="${s*0.30}" rx="${s*0.08}" fill="${hc}"/>
+            <rect x="${s*0.30}" y="${s*0.22}" width="${s*0.40}" height="${s*0.10}" rx="${s*0.05}" fill="${hc}"/>
+        `;
+    }
+    if (hairId.startsWith('bun')) {
+        return `
+            <rect x="${s*0.28}" y="${s*0.12}" width="${s*0.44}" height="${s*0.16}" rx="${s*0.08}" fill="${hc}"/>
+            <circle cx="${cx}" cy="${s*0.09}" r="${s*0.14}" fill="${hc}"/>
+            <rect x="${s*0.38}" y="${s*0.24}" width="${s*0.24}" height="${s*0.08}" rx="${s*0.04}" fill="${hc}"/>
+        `;
+    }
+    // short (default)
+    return `<rect x="${s*0.30}" y="${s*0.12}" width="${s*0.40}" height="${s*0.18}" rx="${s*0.09}" fill="${hc}"/>
+            <rect x="${s*0.30}" y="${s*0.22}" width="${s*0.08}" height="${s*0.10}" rx="${s*0.04}" fill="${hc}"/>
+            <rect x="${s*0.62}" y="${s*0.22}" width="${s*0.08}" height="${s*0.10}" rx="${s*0.04}" fill="${hc}"/>`;
+}
+
+function renderAvatarSVG(skinVal, hairVal, eyeVal, gender, size = 120) {
+    const skin = SKIN_COLORS[skinVal] || '#C68642';
+    const eye  = EYE_COLORS[eyeVal]  || '#5C3317';
+    const hs   = HAIR_STYLES.find(h => h.id === hairVal);
+    const hairColor = hs ? hs.color : '#1a1a1a';
+    const s = size;
+    const cx = s / 2;
+
+    const hairSVG = hairSVGFull(hairVal, hairColor, gender, size);
+
+    return `<svg viewBox="0 0 ${s} ${s}" width="${s}" height="${s}" xmlns="http://www.w3.org/2000/svg">
+        <!-- Corpo -->
+        <ellipse cx="${cx}" cy="${s*0.92}" rx="${s*0.30}" ry="${s*0.18}" fill="${gender==='female'?'#e91e8c':'#1565c0'}"/>
+        <!-- Collo -->
+        <rect x="${s*0.44}" y="${s*0.64}" width="${s*0.12}" height="${s*0.13}" fill="${skin}"/>
+        <!-- Testa -->
+        <ellipse cx="${cx}" cy="${s*0.46}" rx="${s*0.24}" ry="${s*0.27}" fill="${skin}"/>
+        <!-- Capelli -->
+        ${hairSVG}
+        <!-- Occhi bianchi -->
+        <ellipse cx="${s*0.42}" cy="${s*0.44}" rx="${s*0.05}" ry="${s*0.055}" fill="white"/>
+        <ellipse cx="${s*0.58}" cy="${s*0.44}" rx="${s*0.05}" ry="${s*0.055}" fill="white"/>
+        <!-- Iris -->
+        <circle cx="${s*0.42}" cy="${s*0.445}" r="${s*0.028}" fill="${eye}"/>
+        <circle cx="${s*0.58}" cy="${s*0.445}" r="${s*0.028}" fill="${eye}"/>
+        <!-- Luccichio occhi -->
+        <circle cx="${s*0.43}" cy="${s*0.435}" r="${s*0.009}" fill="white"/>
+        <circle cx="${s*0.59}" cy="${s*0.435}" r="${s*0.009}" fill="white"/>
+        <!-- Naso -->
+        <path d="M${cx} ${s*0.52} Q${s*0.46} ${s*0.57} ${s*0.45} ${s*0.58} Q${cx} ${s*0.60} ${s*0.55} ${s*0.58}" stroke="${skin}" stroke-width="${s*0.008}" fill="none" opacity="0.6"/>
+        <!-- Bocca -->
+        <path d="M${s*0.42} ${s*0.64} Q${cx} ${s*0.68} ${s*0.58} ${s*0.64}" stroke="#c0706c" stroke-width="${s*0.014}" fill="none" stroke-linecap="round"/>
+        <!-- Sopracciglia -->
+        <path d="M${s*0.36} ${s*0.40} Q${s*0.42} ${s*0.37} ${s*0.48} ${s*0.40}" stroke="${hairColor||'#555'}" stroke-width="${s*0.016}" fill="none" stroke-linecap="round"/>
+        <path d="M${s*0.52} ${s*0.40} Q${s*0.58} ${s*0.37} ${s*0.64} ${s*0.40}" stroke="${hairColor||'#555'}" stroke-width="${s*0.016}" fill="none" stroke-linecap="round"/>
+    </svg>`;
+}
+
+// ========================
+// BUILD HAIR PICKER
+// ========================
+function buildHairPicker() {
+    const el = document.getElementById('hair-picker');
+    if (!el) return;
+    el.innerHTML = HAIR_STYLES.map(h => {
+        const isActive = h.id === selectedHair;
+        return `<div class="hair-swatch ${isActive ? 'active' : ''}" 
+            data-val="${h.id}"
+            title="${h.label}"
+            onclick="selectHair('${h.id}', this)">
+            ${hairSwatchSVG(h.id, h.color, 36)}
+            <span class="hair-swatch-label">${h.label}</span>
+        </div>`;
+    }).join('');
+}
+
+function selectHair(val, el) {
+    selectedHair = val;
+    document.querySelectorAll('.hair-swatch').forEach(s => s.classList.remove('active'));
+    el.classList.add('active');
+    updateAvatar();
+}
+
+function updateAvatar() {
+    const gender = document.getElementById('c-gender')?.value || 'male';
+    const el = document.getElementById('avatar-preview');
+    if (el) el.innerHTML = renderAvatarSVG(selectedSkin, selectedHair, selectedEye, gender, 110);
+}
+
+function selectSkin(val, el) {
+    selectedSkin = val;
+    document.querySelectorAll('.skin-swatch').forEach(s => s.classList.remove('active'));
+    el.classList.add('active');
+    updateAvatar();
+}
+
+function selectEye(val, el) {
+    selectedEye = val;
+    document.querySelectorAll('.eye-swatch').forEach(s => s.classList.remove('active'));
+    el.classList.add('active');
+    updateAvatar();
+}
+
+// ========================
+// EXIT DROPDOWN MENU
+// ========================
+function toggleExitMenu(e) {
+    e.stopPropagation();
+    const dd = document.getElementById('exit-dropdown');
+    dd.classList.toggle('open');
+}
+
+// Chiudi dropdown se clicchi fuori
+document.addEventListener('click', (e) => {
+    const wrap = document.getElementById('exit-dropdown-wrap');
+    if (wrap && !wrap.contains(e.target)) {
+        document.getElementById('exit-dropdown')?.classList.remove('open');
+    }
+});
+
+function goToCareerSelect() {
+    document.getElementById('exit-dropdown')?.classList.remove('open');
+    // Vai al menu carriere senza fare logout completo
+    currentCareerId = null;
+    localStorage.removeItem('gs_career');
+    // Recupera le carriere dell'account
+    api('auth.php', { action: 'careers' }, 'GET').then(res => {
+        if (res.error) { doLogout(); return; }
+        const emailStored = localStorage.getItem('gs_email') || '';
+        showCareerSelect(res, emailStored);
+    });
+}
 
 // ========================
 // INIT
 // ========================
 document.addEventListener('DOMContentLoaded', async () => {
-    // Naviga ai tab auth
     document.querySelectorAll('.auth-tab').forEach(btn => {
         btn.addEventListener('click', () => showAuthTab(btn.dataset.tab));
     });
-    // Tasto invio nei form
     document.addEventListener('keydown', e => {
         if (e.key !== 'Enter') return;
         const active = document.querySelector('.auth-tab.active');
@@ -34,8 +302,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 showPage('dashboard');
                 return;
             } else {
-                // Ha account ma no carriera selezionata
-                showCareerSelect(res.careers, res.email || '');
+                showCareerSelect(res.careers, res.email || localStorage.getItem('gs_email') || '');
                 return;
             }
         } else {
@@ -45,11 +312,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
     showPage('auth');
+    buildHairPicker();
     updateAvatar();
 });
 
 // ========================
-// API HELPER — manda token in ogni richiesta
+// API HELPER
 // ========================
 async function api(endpoint, data = {}, method = 'POST') {
     try {
@@ -61,7 +329,6 @@ async function api(endpoint, data = {}, method = 'POST') {
                 'X-Auth-Token': authToken || ''
             }
         };
-
         if (method === 'GET') {
             data.token = authToken || '';
             if (currentCareerId) data.career_id = currentCareerId;
@@ -71,7 +338,6 @@ async function api(endpoint, data = {}, method = 'POST') {
             if (currentCareerId && !data.career_id) data.career_id = currentCareerId;
             opts.body = JSON.stringify(data);
         }
-
         const res = await fetch(url, opts);
         const text = await res.text();
         try {
@@ -91,10 +357,7 @@ async function api(endpoint, data = {}, method = 'POST') {
 // ========================
 function showPage(page) {
     const targetPage = document.getElementById(`${page}-page`);
-    if (!targetPage) {
-        console.error(`Pagina non trovata: ${page}-page`);
-        return;
-    }
+    if (!targetPage) { console.error(`Pagina non trovata: ${page}-page`); return; }
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     targetPage.classList.add('active');
     document.querySelectorAll('nav button[data-page]').forEach(b => {
@@ -147,6 +410,7 @@ async function doLogin() {
     if (res.error) { if (errEl) errEl.textContent = res.error; return; }
     authToken = res.token;
     localStorage.setItem('gs_token', authToken);
+    localStorage.setItem('gs_email', email);
     currentCareerId = null; localStorage.removeItem('gs_career');
     showCareerSelect(res.careers || [], res.email || email);
 }
@@ -162,6 +426,7 @@ async function doRegister() {
     if (res.error) { if(errEl) errEl.textContent = res.error; return; }
     authToken = res.token;
     localStorage.setItem('gs_token', authToken);
+    localStorage.setItem('gs_email', email);
     currentCareerId = null;
     showCareerSelect([], email);
 }
@@ -172,15 +437,19 @@ async function doForgot() {
     if (errEl) errEl.textContent = '';
     const res = await api('auth.php', { action:'request_reset', email }, 'POST');
     if (res.error) { if(errEl) errEl.textContent = res.error; return; }
-    if (errEl) { errEl.style.color='#4caf50'; errEl.textContent = res.msg || 'Istruzioni inviate!'; }
+    if (errEl) {
+        errEl.style.color='#4caf50';
+        errEl.textContent = res.msg || 'Istruzioni inviate!';
+    }
     if (res.debug_link) console.log('RESET LINK (dev):', res.debug_link);
 }
 
 async function doLogout() {
+    document.getElementById('exit-dropdown')?.classList.remove('open');
     await api('auth.php', { action:'logout' }, 'POST');
     authToken = null; currentPlayer = null; currentCareerId = null;
-    localStorage.removeItem('gs_token'); localStorage.removeItem('gs_career');
-    document.getElementById('main-nav').style.display = 'none';
+    localStorage.removeItem('gs_token');
+    localStorage.removeItem('gs_career');
     const mb = document.getElementById('auth-box-main');
     const cs = document.getElementById('career-select-box');
     const cc = document.getElementById('create-career-box');
@@ -189,8 +458,6 @@ async function doLogout() {
     if (cc) cc.style.display = 'none';
     showPage('auth'); showAuthTab('login');
 }
-
-document.getElementById('logout-btn').addEventListener('click', doLogout);
 
 // CARRIERE
 function showCareerSelect(careers, email) {
@@ -250,6 +517,12 @@ function showCreateCareer() {
     const cc = document.getElementById('create-career-box');
     if (cs) cs.style.display = 'none';
     if (cc) cc.style.display = 'block';
+    // Reset defaults
+    selectedSkin = 'medium'; selectedEye = 'brown'; selectedHair = 'short_black';
+    buildHairPicker();
+    // Reset skin/eye pickers visual state
+    document.querySelectorAll('.skin-swatch').forEach(s => s.classList.toggle('active', s.dataset.val === 'medium'));
+    document.querySelectorAll('.eye-swatch').forEach(s => s.classList.toggle('active', s.dataset.val === 'brown'));
     updateAvatar();
 }
 
@@ -259,10 +532,12 @@ async function doCreateCareer() {
     const gender      = document.getElementById('c-gender')?.value || 'male';
     const age         = document.getElementById('c-age')?.value || '17';
     const nationality = document.getElementById('c-nationality')?.value || 'Italy';
-    const skin_hair   = document.getElementById('c-hair')?.value || 'short_black';
     const errEl       = document.getElementById('create-error');
     if (errEl) errEl.textContent = '';
-    const res = await api('auth.php', { action:'create_career', career_name, player_name, gender, age, nationality, skin_hair, skin_color:selectedSkin, eye_color:selectedEye }, 'POST');
+    const res = await api('auth.php', {
+        action:'create_career', career_name, player_name, gender, age, nationality,
+        skin_hair: selectedHair, skin_color: selectedSkin, eye_color: selectedEye
+    }, 'POST');
     if (res.error) { if(errEl) errEl.textContent = res.error; return; }
     currentCareerId = res.career_id; localStorage.setItem('gs_career', currentCareerId);
     await loadPlayer(); showPage('dashboard');
@@ -284,48 +559,7 @@ async function confirmDeleteCareer(id, name) {
     renderCareerList(res.careers); toast('Carriera eliminata','info');
 }
 
-// AVATAR SVG
-const SKIN_COLORS = {light:'#FDDBB4',medium_light:'#E8B88A',medium:'#C68642',medium_dark:'#8D5524',dark:'#3B1A08'};
-const HAIR_COLORS = {short_black:'#1a1a1a',short_brown:'#5c3317',short_blonde:'#D4A017',short_red:'#8B2500',long_black:'#1a1a1a',long_brown:'#5c3317',long_blonde:'#D4A017',curly_black:'#1a1a1a',curly_brown:'#5c3317',afro_black:'#1a1a1a',afro_brown:'#5c3317',bald:null};
-const EYE_COLORS  = {brown:'#5C3317',blue:'#1E90FF',green:'#228B22',hazel:'#8B6914',gray:'#708090'};
-
-function renderAvatarSVG(skinVal,hairVal,eyeVal,gender,size=120) {
-    const skin = SKIN_COLORS[skinVal]||'#C68642';
-    const hair = HAIR_COLORS[hairVal];
-    const eye  = EYE_COLORS[eyeVal]||'#5C3317';
-    const isLong=hairVal?.startsWith('long'), isAfro=hairVal?.startsWith('afro'), isCurly=hairVal?.startsWith('curly'), isBald=hairVal==='bald';
-    let hairSVG='';
-    if (!isBald&&hair) {
-        if (isAfro)       hairSVG=`<ellipse cx="60" cy="38" rx="30" ry="28" fill="${hair}" opacity="0.95"/>`;
-        else if (isLong)  hairSVG=`<rect x="28" y="18" width="44" height="14" rx="7" fill="${hair}"/><rect x="24" y="28" width="10" height="44" rx="5" fill="${hair}"/><rect x="86" y="28" width="10" height="44" rx="5" fill="${hair}"/>`;
-        else if (isCurly) hairSVG=`<ellipse cx="60" cy="25" rx="24" ry="14" fill="${hair}"/><circle cx="38" cy="30" r="10" fill="${hair}"/><circle cx="82" cy="30" r="10" fill="${hair}"/>`;
-        else              hairSVG=`<rect x="34" y="18" width="52" height="16" rx="8" fill="${hair}"/><rect x="34" y="26" width="8" height="12" rx="4" fill="${hair}"/><rect x="78" y="26" width="8" height="12" rx="4" fill="${hair}"/>`;
-    }
-    return `<svg viewBox="0 0 120 120" width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
-        <ellipse cx="60" cy="105" rx="34" ry="22" fill="${gender==='female'?'#e91e8c':'#1565c0'}"/>
-        <rect x="52" y="72" width="16" height="14" fill="${skin}"/>
-        <ellipse cx="60" cy="55" rx="26" ry="28" fill="${skin}"/>
-        ${hairSVG}
-        <ellipse cx="50" cy="52" rx="4" ry="4.5" fill="white"/><ellipse cx="70" cy="52" rx="4" ry="4.5" fill="white"/>
-        <circle cx="50.5" cy="52.5" r="2.5" fill="${eye}"/><circle cx="70.5" cy="52.5" r="2.5" fill="${eye}"/>
-        <circle cx="51.5" cy="51.5" r="0.8" fill="white"/><circle cx="71.5" cy="51.5" r="0.8" fill="white"/>
-        <path d="M59 58 Q57 63 55 64 Q59 66 65 64 Q63 63 61 58Z" fill="${skin}" stroke="${skin}" stroke-width="0.5" opacity="0.7"/>
-        <path d="M52 70 Q60 75 68 70" stroke="#c0706c" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-        <path d="M44 46 Q50 43 56 46" stroke="${hair||'#555'}" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-        <path d="M64 46 Q70 43 76 46" stroke="${hair||'#555'}" stroke-width="1.8" fill="none" stroke-linecap="round"/>
-    </svg>`;
-}
-
-function updateAvatar() {
-    const hair = document.getElementById('c-hair')?.value||'short_black';
-    const gender = document.getElementById('c-gender')?.value||'male';
-    const el = document.getElementById('avatar-preview');
-    if (el) el.innerHTML = renderAvatarSVG(selectedSkin,hair,selectedEye,gender,120);
-}
-function selectSkin(val,el) { selectedSkin=val; document.querySelectorAll('.skin-swatch').forEach(s=>s.classList.remove('active')); el.classList.add('active'); updateAvatar(); }
-function selectEye(val,el)  { selectedEye=val;  document.querySelectorAll('.eye-swatch').forEach(s=>s.classList.remove('active'));  el.classList.add('active');  updateAvatar(); }
-
-function showError(id,msg) { const el=document.getElementById(id); if(el){el.textContent=msg; setTimeout(()=>el.textContent='',5000);} }
+function showError(id, msg) { const el=document.getElementById(id); if(el){el.textContent=msg; setTimeout(()=>el.textContent='',5000);} }
 
 // ========================
 // LOAD PLAYER
@@ -352,15 +586,16 @@ function renderDashboard() {
 
     document.getElementById('player-name-display').textContent = p.player_name;
     document.getElementById('player-subtitle').textContent = `${p.nationality} · ${p.age} anni · Anno ${p.anno_corrente}`;
-    const avatarEl = document.getElementById('player-avatar-icon');
-    if (avatarEl) {
-        const svgAvatar = renderAvatarSVG(p.skin_color||'medium', p.skin_hair||'short_black', p.eye_color||'brown', p.gender||'male', 64);
-        avatarEl.innerHTML = '';
-        avatarEl.insertAdjacentHTML('afterend', `<div id="player-avatar-svg" style="width:64px;height:64px">${svgAvatar}</div>`);
-        avatarEl.style.display = 'none';
-        const oldSvg = document.getElementById('player-avatar-svg');
-        // Evita duplicati
-        document.querySelectorAll('#player-avatar-svg').forEach((el,i) => { if(i>0) el.remove(); });
+
+    // Avatar SVG
+    const avatarWrap = document.querySelector('.player-avatar');
+    if (avatarWrap) {
+        avatarWrap.innerHTML = renderAvatarSVG(
+            p.skin_color||'medium', p.skin_hair||'short_black',
+            p.eye_color||'brown', p.gender||'male', 72
+        );
+        avatarWrap.style.background = 'transparent';
+        avatarWrap.style.border = '3px solid var(--gold)';
     }
 
     const stars = '⭐'.repeat(parseInt(p.team_stelle || 1));
@@ -566,35 +801,24 @@ async function loadTransfer() {
         api('player.php', { action: 'leghe' }, 'GET'),
         api('player.php', { action: 'get'   }, 'GET')
     ]);
-
-    // Se nessuna nazione selezionata, default a quella del giocatore
     if (!selectedNazioneId && p.lega_id) {
         const myLega = leghe.find(l => l.id == p.lega_id);
         if (myLega) selectedNazioneId = myLega.nazione_id;
     }
-
     const el = document.getElementById('teams-grid');
-
-    // Raggruppa leghe per nazione
     const nazioniMap = {};
     leghe.forEach(l => {
         if (!nazioniMap[l.nazione_id]) nazioniMap[l.nazione_id] = { id: l.nazione_id, nome: l.nazione_nome, bandiera: l.bandiera, leghe: [] };
         nazioniMap[l.nazione_id].leghe.push(l);
     });
-
-    // Tab nazioni
     let html = '<div class="nazione-tabs">';
     Object.values(nazioniMap).forEach(n => {
         const isActive  = selectedNazioneId == n.id;
         const isCurrent = leghe.find(l => l.id == p.lega_id)?.nazione_id == n.id;
         html += `<button class="nazione-tab ${isActive ? 'active' : ''} ${isCurrent ? 'current-naz' : ''}"
-            onclick="selectNazione(${n.id})">
-            ${n.bandiera} ${n.nome}${isCurrent ? ' ★' : ''}
-        </button>`;
+            onclick="selectNazione(${n.id})">${n.bandiera} ${n.nome}${isCurrent ? ' ★' : ''}</button>`;
     });
     html += '</div>';
-
-    // Per la nazione selezionata, mostra le 2 leghe come sub-tab
     const nazione = nazioniMap[selectedNazioneId];
     if (nazione) {
         html += '<div class="lega-subtabs">';
@@ -602,20 +826,13 @@ async function loadTransfer() {
             const isActive  = selectedLegaId == l.id || (!selectedLegaId && l.id == p.lega_id);
             const isCurrent = l.id == p.lega_id;
             html += `<button class="lega-subtab ${isActive ? 'active' : ''} ${isCurrent ? 'current-lega' : ''}"
-                onclick="filterLega(${l.id})">
-                ${l.livello == 1 ? '🥇' : '🥈'} ${l.nome}${isCurrent ? ' (tua lega)' : ''}
-            </button>`;
+                onclick="filterLega(${l.id})">${l.livello == 1 ? '🥇' : '🥈'} ${l.nome}${isCurrent ? ' (tua lega)' : ''}</button>`;
         });
         html += '</div>';
-
-        // Determina quale lega mostrare
         const legaToShow = selectedLegaId || (nazione.leghe.find(l => l.id == p.lega_id) || nazione.leghe[0]).id;
-        const params = { action: 'teams', lega_id: legaToShow };
-        const teams = await api('player.php', params, 'GET');
-
+        const teams = await api('player.php', { action: 'teams', lega_id: legaToShow }, 'GET');
         html += '<div class="teams-grid-inner">' + teams.map(t => renderTeamCard(t, p)).join('') + '</div>';
     }
-
     el.innerHTML = html;
 }
 
@@ -623,7 +840,6 @@ function renderTeamCard(t, p) {
     const isCurrent = t.id == p.team_id;
     const stars = '⭐'.repeat(t.stelle);
     const minOvBase = (t.stelle - 1) * 15 + 55;
-    // Sconto agente (caricato dal player data se disponibile)
     const agentSconto = parseFloat(p.agent_ovr_sconto || 0);
     const minOv = t.stelle > 1 ? Math.max(55, Math.floor(minOvBase * (1 - agentSconto/100))) : minOvBase;
     const scontoLabel = agentSconto > 0 && t.stelle > 1 ? ` <span style="color:var(--green);font-size:0.7rem">(-${agentSconto}% agente)</span>` : '';
@@ -631,8 +847,7 @@ function renderTeamCard(t, p) {
     const legaBadge = t.lega_livello == 1 ? '<span class="lega-badge primo">1ª Div</span>' : '<span class="lega-badge secondo">2ª Div</span>';
     return `<div class="team-card ${isCurrent ? 'current' : ''}">
         <div style="display:flex;justify-content:space-between;align-items:flex-start">
-            <div class="team-stars">${stars}</div>
-            ${legaBadge}
+            <div class="team-stars">${stars}</div>${legaBadge}
         </div>
         <div class="team-name">${t.nome}</div>
         <div style="font-size:0.75rem;color:var(--text-dim);margin-bottom:8px">${t.bandiera || ''} ${t.nazione_nome || ''} · ${t.lega_nome || ''}</div>
@@ -651,16 +866,8 @@ function renderTeamCard(t, p) {
     </div>`;
 }
 
-async function filterLega(legaId) {
-    selectedLegaId = legaId;
-    await loadTransfer();
-}
-
-async function selectNazione(nazioneId) {
-    selectedNazioneId = nazioneId;
-    selectedLegaId = null; // reset lega quando cambia nazione
-    await loadTransfer();
-}
+async function filterLega(legaId) { selectedLegaId = legaId; await loadTransfer(); }
+async function selectNazione(nazioneId) { selectedNazioneId = nazioneId; selectedLegaId = null; await loadTransfer(); }
 
 async function transferTo(teamId, teamName) {
     if (!confirm(`Vuoi trasferirti a ${teamName}?`)) return;
@@ -684,16 +891,9 @@ async function loadStrutture() {
     const el = document.getElementById('strutture-container');
     el.innerHTML = `
         <div class="info-cards" style="margin-bottom:20px">
-            <div class="info-card">
-                <div class="val">${formatMoney(player.soldi)}</div>
-                <div class="lbl">Soldi Disponibili</div>
-            </div>
-            <div class="info-card">
-                <div class="val">${getStrutturaName(player.struttura_livello)}</div>
-                <div class="lbl">Struttura Attuale</div>
-            </div>
-        </div>
-    `;
+            <div class="info-card"><div class="val">${formatMoney(player.soldi)}</div><div class="lbl">Soldi Disponibili</div></div>
+            <div class="info-card"><div class="val">${getStrutturaName(player.struttura_livello)}</div><div class="lbl">Struttura Attuale</div></div>
+        </div>`;
     strutture.forEach(s => {
         const owned   = player.struttura_livello >= s.livello;
         const isNext  = player.struttura_livello == s.livello - 1;
@@ -720,8 +920,7 @@ async function loadStrutture() {
                         ${!isNext ? '🔒 Sequenziale' : !canAfford ? '💸 Fondi insuff.' : '🏗️ Acquista'}
                       </button>`
                 }
-            </div>
-        `;
+            </div>`;
         el.appendChild(div);
     });
 }
@@ -735,23 +934,16 @@ async function buyStruttura(livello) {
 }
 
 // ========================
-// OBIETTIVI DASHBOARD
+// OBIETTIVI
 // ========================
 async function loadDashboardObiettivi() {
     const res = await api('extra.php', { action: 'obiettivi' }, 'GET');
     const el  = document.getElementById('dashboard-obiettivi');
     if (!el || !res || res.error || !res.length) return;
-
-    const tot       = res.length;
-    const completati = res.filter(o => o.completato == 1).length;
-
+    const tot = res.length, completati = res.filter(o => o.completato == 1).length;
     let html = `<div class="obiettivi-box">
-        <div class="obiettivi-header">
-            <span>🎯 Obiettivi Stagionali</span>
-            <span class="ob-counter">${completati}/${tot} completati</span>
-        </div>
+        <div class="obiettivi-header"><span>🎯 Obiettivi Stagionali</span><span class="ob-counter">${completati}/${tot} completati</span></div>
         <div class="obiettivi-list">`;
-
     res.forEach(ob => {
         const pct  = Math.min(100, Math.round((ob.progresso / ob.target) * 100));
         const done = ob.completato == 1;
@@ -766,35 +958,29 @@ async function loadDashboardObiettivi() {
             </div>
         </div>`;
     });
-
     html += '</div></div>';
     el.innerHTML = html;
 }
 
 // ========================
-// NOTIZIE INLINE DASHBOARD
+// NOTIZIE DASHBOARD
 // ========================
 async function loadDashboardNotizie() {
     const res = await api('extra.php', { action: 'notizie' }, 'GET');
     if (!res || res.error) return;
-
     const unread = res.unread || 0;
     const badge  = document.getElementById('dash-news-unread');
     if (badge) {
         if (unread > 0) { badge.textContent = unread; badge.style.display = 'inline'; }
         else badge.style.display = 'none';
     }
-
     const el = document.getElementById('dash-notizie-lista');
     if (!el) return;
     if (!res.notizie || !res.notizie.length) {
         el.innerHTML = '<p style="color:var(--text-dim);font-size:0.82rem;padding:8px 0">Gioca il primo mese per ricevere notizie!</p>';
         return;
     }
-
     const tipoIcon = { positivo:'🟢', negativo:'🔴', mercato:'💼', agente:'🤝', obiettivo:'🎯', info:'📋' };
-
-    // Mostra le ultime 8 notizie nella sidebar
     el.innerHTML = res.notizie.slice(0, 8).map(n => `
         <div class="dash-news-item ${n.letto == 0 ? 'dash-news-unread' : ''} news-${n.tipo}">
             <div class="dash-news-top">
@@ -802,10 +988,7 @@ async function loadDashboardNotizie() {
                 <span class="dash-news-data">${getMeseName(n.mese)} A${n.anno}</span>
             </div>
             <div class="dash-news-testo">${n.testo}</div>
-        </div>
-    `).join('');
-
-    // Segna come lette
+        </div>`).join('');
     api('extra.php', { action: 'leggi' }, 'GET');
 }
 
@@ -815,19 +998,14 @@ async function loadDashboardNotizie() {
 async function loadNotizie() {
     const res = await api('extra.php', { action: 'notizie' }, 'GET');
     const el  = document.getElementById('notizie-lista');
-
-    // Segna come lette
     api('extra.php', { action: 'leggi' }, 'GET');
     const btn = document.getElementById('nav-notizie');
     if (btn) btn.innerHTML = '📰 Notizie';
-
     if (!res || res.error || !res.notizie.length) {
         el.innerHTML = '<p style="color:var(--text-dim);padding:20px">Nessuna notizia ancora. Gioca qualche mese!</p>';
         return;
     }
-
     const tipoIcon = { positivo:'🟢', negativo:'🔴', mercato:'💼', agente:'🤝', obiettivo:'🎯', info:'📋' };
-
     el.innerHTML = res.notizie.map(n => `
         <div class="news-card ${n.letto == 0 ? 'news-unread' : ''} news-${n.tipo}">
             <div class="news-header">
@@ -836,8 +1014,7 @@ async function loadNotizie() {
                 <span class="news-data">${getMeseName(n.mese)} Anno ${n.anno}</span>
             </div>
             <div class="news-testo">${n.testo}</div>
-        </div>
-    `).join('');
+        </div>`).join('');
 }
 
 // ========================
@@ -850,10 +1027,7 @@ async function loadAgente() {
             api('agente.php', { action: 'get' }, 'GET'),
             api('player.php',  { action: 'get' }, 'GET')
         ]);
-    } catch(e) {
-        console.error('Errore caricamento agente:', e);
-        return;
-    }
+    } catch(e) { console.error('Errore caricamento agente:', e); return; }
 
     const cur = document.getElementById('agente-current');
     const lst = document.getElementById('agente-lista');
@@ -867,21 +1041,17 @@ async function loadAgente() {
     const livello = parseInt(res.livello) || 0;
     const agenti  = res.agenti || {};
     const entries = Object.entries(agenti);
-    if (!entries.length) {
-        lst.innerHTML = '<p style="color:var(--text-dim)">Nessun agente disponibile.</p>';
-        return;
-    }
+    if (!entries.length) { lst.innerHTML = '<p style="color:var(--text-dim)">Nessun agente disponibile.</p>'; return; }
 
     const myPop   = parseInt(player?.popolarita) || 0;
     const mySoldi = parseFloat(player?.soldi)    || 0;
 
-    // --- Agente attuale ---
     if (livello > 0 && agenti[livello]) {
         const info = agenti[livello];
         cur.innerHTML = `
             <div class="agente-attuale">
                 <div class="agente-avatar">🤝</div>
-                <div class="agente-info">
+                <div>
                     <div class="agente-nome">${res.nome || info.nome}</div>
                     <div class="agente-livello">Livello ${livello}/4</div>
                     <div class="agente-bonus">
@@ -895,32 +1065,25 @@ async function loadAgente() {
         cur.innerHTML = `<div class="agente-vuoto">👤 Non hai ancora un agente. Assumine uno per massimizzare i guadagni e facilitare i trasferimenti!</div>`;
     }
 
-    // --- Lista agenti ---
     let html = '<h3 style="margin-bottom:16px;color:var(--gold)">Scegli il tuo agente</h3><div class="agenti-grid">';
-
     entries.forEach(([lvStr, info]) => {
-        const lv      = parseInt(lvStr);
+        const lv = parseInt(lvStr);
         const isOwned = livello >= lv;
         const isNext  = livello === lv - 1;
         const popOk   = myPop >= parseInt(info.pop_richiesta || 0);
-
-        // Costo reale: se già ho un agente e questo è il prossimo livello, uso costo_up del mio attuale
         let costoReale = parseInt(info.costo);
         if (isNext && livello > 0 && agenti[livello]) {
             costoReale = parseInt(agenti[livello].costo_up) || parseInt(info.costo);
         }
         const soldiOk = mySoldi >= costoReale;
         const canHire = isNext && popOk && soldiOk;
-
         let lockMsg = '';
-        if      (!isOwned && !isNext) lockMsg = `🔒 Richiede prima Lv.${lv-1}`;
-        else if (!popOk)              lockMsg = `👥 Serve pop. ${info.pop_richiesta} (hai ${myPop})`;
-        else if (!soldiOk)            lockMsg = `💸 Mancano €${(costoReale - mySoldi).toLocaleString('it')}`;
-
+        if (!isOwned && !isNext) lockMsg = `🔒 Richiede prima Lv.${lv-1}`;
+        else if (!popOk)         lockMsg = `👥 Serve pop. ${info.pop_richiesta} (hai ${myPop})`;
+        else if (!soldiOk)       lockMsg = `💸 Mancano €${(costoReale - mySoldi).toLocaleString('it')}`;
         const btnLabel = livello > 0 && isNext
             ? `⬆️ Upgrade — €${costoReale.toLocaleString('it')}`
             : `🤝 Assumi — €${costoReale.toLocaleString('it')}`;
-
         html += `
         <div class="agente-card ${isOwned ? 'owned' : ''} ${isNext && popOk && !isOwned ? 'next' : ''}">
             <div class="agente-card-header">
@@ -934,12 +1097,8 @@ async function loadAgente() {
                 <span>📉 -${info.bonus_ovr_sconto}% OVR</span>
             </div>
             <div class="ag-requisiti">
-                <span class="${popOk ? 'req-ok' : 'req-no'}">
-                    👥 ${parseInt(info.pop_richiesta) > 0 ? 'Pop. ' + info.pop_richiesta : 'Libero'}
-                </span>
-                <span class="${soldiOk || isOwned ? 'req-ok' : 'req-no'}">
-                    💰 €${costoReale.toLocaleString('it')}
-                </span>
+                <span class="${popOk ? 'req-ok' : 'req-no'}">👥 ${parseInt(info.pop_richiesta) > 0 ? 'Pop. ' + info.pop_richiesta : 'Libero'}</span>
+                <span class="${soldiOk || isOwned ? 'req-ok' : 'req-no'}">💰 €${costoReale.toLocaleString('it')}</span>
             </div>
             ${isOwned
                 ? '<div class="ag-badge-ok">✅ Agente attivo</div>'
@@ -949,7 +1108,6 @@ async function loadAgente() {
             }
         </div>`;
     });
-
     html += '</div>';
     lst.innerHTML = html;
 }
@@ -974,67 +1132,39 @@ async function loadClassifica() {
         api('player.php', { action: 'leghe' }, 'GET'),
         api('player.php', { action: 'get' }, 'GET')
     ]);
-
-    // Default: lega del giocatore
     if (!selectedClassLegaId && player.lega_id) selectedClassLegaId = player.lega_id;
-
-    // Filtri lega
     const filterEl = document.getElementById('classifica-lega-filters');
     const nazioniMap = {};
     leghe.forEach(l => {
         if (!nazioniMap[l.nazione_id]) nazioniMap[l.nazione_id] = { nome: l.nazione_nome, bandiera: l.bandiera, leghe: [] };
         nazioniMap[l.nazione_id].leghe.push(l);
     });
-
     let filterHtml = '';
     Object.values(nazioniMap).forEach(n => {
         n.leghe.forEach(l => {
             const isActive  = selectedClassLegaId == l.id;
             const isCurrent = player.lega_id == l.id;
-            filterHtml += `<button class="lega-filter-btn ${isActive ? 'active' : ''} ${isCurrent ? 'current-lega' : ''}"
-                onclick="selectClassLega(${l.id})">
-                ${n.bandiera} ${l.nome}${isCurrent ? ' ★' : ''}
-            </button>`;
+            filterHtml += `<button class="lega-filter-btn ${isActive ? 'active' : ''} ${isCurrent ? 'current-lega' : ''}" onclick="selectClassLega(${l.id})">${n.bandiera} ${l.nome}${isCurrent ? ' ★' : ''}</button>`;
         });
     });
     filterEl.innerHTML = filterHtml;
-
     if (selectedClassLegaId) await renderClassificaTable(selectedClassLegaId, player);
     if (currentClassTab === 'champions') await renderChampions(player);
 }
 
-async function selectClassLega(legaId) {
-    selectedClassLegaId = legaId;
-    await loadClassifica();
-}
+async function selectClassLega(legaId) { selectedClassLegaId = legaId; await loadClassifica(); }
 
 async function renderClassificaTable(legaId, player) {
     const wrap = document.getElementById('classifica-table-wrap');
     wrap.innerHTML = '<p class="loading">⏳ Caricamento...</p>';
-
     const anno = player.anno_corrente;
     const data = await api('classifica.php', { action: 'get', lega_id: legaId, anno }, 'GET');
-
     if (!data || data.error || !data.length) {
         wrap.innerHTML = '<p style="color:var(--text-dim);padding:20px">Nessuna partita giocata ancora in questa lega.</p>';
         return;
     }
-
     let html = `<table class="season-table classifica-table">
-        <thead><tr>
-            <th>#</th>
-            <th>Squadra</th>
-            <th>OVR</th>
-            <th>G</th>
-            <th>V</th>
-            <th>P</th>
-            <th>S</th>
-            <th>GF</th>
-            <th>GS</th>
-            <th>DR</th>
-            <th>Pts</th>
-        </tr></thead><tbody>`;
-
+        <thead><tr><th>#</th><th>Squadra</th><th>OVR</th><th>G</th><th>V</th><th>P</th><th>S</th><th>GF</th><th>GS</th><th>DR</th><th>Pts</th></tr></thead><tbody>`;
     data.forEach((row, i) => {
         const isMyTeam = row.team_id == player.team_id;
         const pos = i + 1;
@@ -1043,90 +1173,64 @@ async function renderClassificaTable(legaId, player) {
         else if (pos <= 3) posClass = 'class-pos-top3';
         else if (pos <= 4) posClass = 'class-pos-top4';
         else if (pos >= data.length - 2) posClass = 'class-pos-retro';
-
         const dr = (row.gol_fatti - row.gol_subiti);
         const drStr = dr > 0 ? '+' + dr : dr;
         const stelle = '⭐'.repeat(parseInt(row.stelle));
-
         html += `<tr class="${isMyTeam ? 'my-team-row' : ''} ${posClass}">
             <td class="pos-cell"><span class="pos-badge ${posClass}">${pos}</span></td>
-            <td class="team-name-cell">
-                <span class="team-name-cl">${row.team_nome}</span>
-                <span class="team-stars-sm">${stelle}</span>
-                ${isMyTeam ? '<span class="my-team-badge">TU</span>' : ''}
-            </td>
+            <td class="team-name-cell"><span class="team-name-cl">${row.team_nome}</span><span class="team-stars-sm">${stelle}</span>${isMyTeam ? '<span class="my-team-badge">TU</span>' : ''}</td>
             <td><span class="ovr-badge">${row.ovr}</span></td>
-            <td>${row.partite_giocate}</td>
-            <td>${row.vittorie}</td>
-            <td>${row.pareggi}</td>
-            <td>${row.sconfitte}</td>
-            <td>${row.gol_fatti}</td>
-            <td>${row.gol_subiti}</td>
-            <td>${drStr}</td>
+            <td>${row.partite_giocate}</td><td>${row.vittorie}</td><td>${row.pareggi}</td><td>${row.sconfitte}</td>
+            <td>${row.gol_fatti}</td><td>${row.gol_subiti}</td><td>${drStr}</td>
             <td><strong>${row.punti}</strong></td>
         </tr>`;
     });
-
     html += '</tbody></table>';
-
-    // Legenda
     html += `<div class="classifica-legenda">
         <span class="leg-item class-pos-1">🥇 Campione</span>
         <span class="leg-item class-pos-top3">🥉 Podio</span>
         <span class="leg-item class-pos-top4">⭐ Champions Cup</span>
         <span class="leg-item class-pos-retro">📉 Zona retrocessione</span>
     </div>`;
-
     wrap.innerHTML = html;
 }
 
 async function renderChampions(player) {
     const wrap = document.getElementById('champions-wrap');
     wrap.innerHTML = '<p class="loading">⏳ Caricamento...</p>';
-    const anno = player.anno_corrente;
-    const data = await api('classifica.php', { action: 'champions', anno }, 'GET');
-
+    const data = await api('classifica.php', { action: 'champions', anno: player.anno_corrente }, 'GET');
     if (!data || data.error || !data.length) {
         wrap.innerHTML = '<p style="color:var(--text-dim);padding:20px">🏆 La Champions Cup non è ancora iniziata. Le squadre si qualificano a fine stagione (top 4 di ogni Prima Divisione).</p>';
         return;
     }
-
     const fasi = { vincitore: [], finale: [], semifinale: [], quarti: [], gironi: [] };
     data.forEach(t => {
-        const f = t.eliminato ? 'eliminato_' + t.fase : t.fase;
         if (t.fase === 'vincitore') fasi.vincitore.push(t);
-        else if (!t.eliminato) fasi[t.fase]?.push(t);
-        else fasi[t.fase]?.push({...t, eliminato: true});
+        else fasi[t.fase]?.push(t);
     });
-
     let html = '<div class="champions-grid">';
-
     const fasiOrdine = [
-        { key: 'vincitore',   label: '🏆 Vincitore', cls: 'fase-vincitore' },
-        { key: 'finale',      label: '🥇 Finale',     cls: 'fase-finale' },
-        { key: 'semifinale',  label: '🥈 Semifinale', cls: 'fase-semi' },
-        { key: 'quarti',      label: '⚽ Quarti',     cls: 'fase-quarti' },
-        { key: 'gironi',      label: '📋 Fase Gironi',cls: 'fase-gironi' },
+        { key: 'vincitore', label: '🏆 Vincitore', cls: 'fase-vincitore' },
+        { key: 'finale',    label: '🥇 Finale',    cls: 'fase-finale' },
+        { key: 'semifinale',label: '🥈 Semifinale',cls: 'fase-semi' },
+        { key: 'quarti',    label: '⚽ Quarti',    cls: 'fase-quarti' },
+        { key: 'gironi',    label: '📋 Gironi',    cls: 'fase-gironi' },
     ];
-
     fasiOrdine.forEach(f => {
         const teams = fasi[f.key];
         if (!teams || !teams.length) return;
-        html += `<div class="champions-fase ${f.cls}">
-            <div class="fase-titolo">${f.label}</div>`;
+        html += `<div class="champions-fase ${f.cls}"><div class="fase-titolo">${f.label}</div>`;
         teams.forEach(t => {
             const isMyTeam = t.team_id == player.team_id;
-            const stelle   = '⭐'.repeat(parseInt(t.stelle));
             html += `<div class="champions-team ${isMyTeam ? 'my-champions-team' : ''} ${t.eliminato ? 'elim' : ''}">
                 <span>${t.bandiera || ''} ${t.team_nome}</span>
-                <span>${stelle} <span class="ovr-badge">${t.ovr}</span></span>
+                <span>${'⭐'.repeat(parseInt(t.stelle))} <span class="ovr-badge">${t.ovr}</span></span>
                 ${isMyTeam ? '<span class="my-team-badge">TU</span>' : ''}
                 ${t.eliminato ? '<span class="elim-badge">Eliminato</span>' : ''}
             </div>`;
         });
         html += '</div>';
     });
-
     html += '</div>';
     document.getElementById('champions-wrap').innerHTML = html;
 }
