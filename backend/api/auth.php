@@ -81,10 +81,107 @@ function requestReset($data){
     $db->prepare("INSERT INTO password_resets (account_id,token,expires_at) VALUES(?,?,?)")->execute([$account['id'],$token,$expires]);
     $host=$_SERVER['HTTP_HOST']??'localhost:8080';
     $link="http://{$host}/frontend/reset.html?token={$token}";
-    $subj="Reset Password Golden Striker";
-    $msg="Ciao!\n\nHai richiesto il reset della password.\n\nLink (valido 1 ora):\n{$link}\n\nSe non hai richiesto nulla, ignora.\n\nGolden Striker";
-    @mail($email,$subj,$msg,"From: noreply@goldenstrikergame.com\r\nContent-Type: text/plain; charset=UTF-8");
-    echo json_encode(['success'=>true,'msg'=>'Istruzioni inviate!','debug_link'=>$link]);
+    $sent = sendGmailSMTP(
+        $email,
+        "Reset Password Golden Striker ⚽",
+        "Ciao!\n\nHai richiesto il reset della password per il tuo account Golden Striker.\n\nClicca il link qui sotto (valido 1 ora):\n{$link}\n\nSe non hai richiesto nulla, ignora questa email.\n\nBuona fortuna in campo! ⚽\nGolden Striker"
+    );
+    echo json_encode(['success'=>true,'msg'=>'Istruzioni inviate via email!','debug_link'=>$link,'mail_sent'=>$sent]);
+}
+
+/**
+ * Invia email tramite Gmail SMTP nativo (senza PHPMailer)
+ */
+function sendGmailSMTP($to, $subject, $body) {
+    $from     = 'goldenstrikerreset@gmail.com';
+    $fromPass = 'GoldenStriker..';
+    $fromName = 'Golden Striker';
+    $smtp     = 'smtp.gmail.com';
+    $port     = 587;
+
+    // Tenta connessione SMTP
+    $socket = @fsockopen($smtp, $port, $errno, $errstr, 10);
+    if (!$socket) {
+        // Fallback a mail() nativo
+        $headers  = "From: {$fromName} <{$from}>\r\n";
+        $headers .= "Reply-To: {$from}\r\n";
+        $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
+        @mail($to, $subject, $body, $headers);
+        return false;
+    }
+
+    $read = function() use ($socket) {
+        $response = '';
+        while (!feof($socket)) {
+            $line = fgets($socket, 515);
+            $response .= $line;
+            if (substr($line, 3, 1) === ' ') break;
+        }
+        return $response;
+    };
+
+    $send = function($cmd) use ($socket) {
+        fputs($socket, $cmd . "\r\n");
+    };
+
+    $read(); // Banner
+
+    $send("EHLO localhost");
+    $ehlo = $read();
+
+    $send("STARTTLS");
+    $read();
+
+    // Upgrade a TLS
+    stream_socket_enable_crypto($socket, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
+
+    $send("EHLO localhost");
+    $read();
+
+    $send("AUTH LOGIN");
+    $read();
+
+    $send(base64_encode($from));
+    $read();
+
+    $send(base64_encode($fromPass));
+    $authResp = $read();
+
+    if (strpos($authResp, '235') === false) {
+        fclose($socket);
+        // Fallback a mail()
+        $headers  = "From: {$fromName} <{$from}>\r\n";
+        $headers .= "Content-Type: text/plain; charset=UTF-8\r\n";
+        @mail($to, $subject, $body, $headers);
+        return false;
+    }
+
+    $send("MAIL FROM:<{$from}>");
+    $read();
+
+    $send("RCPT TO:<{$to}>");
+    $rcpt = $read();
+
+    $send("DATA");
+    $read();
+
+    $message  = "From: {$fromName} <{$from}>\r\n";
+    $message .= "To: {$to}\r\n";
+    $message .= "Subject: {$subject}\r\n";
+    $message .= "MIME-Version: 1.0\r\n";
+    $message .= "Content-Type: text/plain; charset=UTF-8\r\n";
+    $message .= "Content-Transfer-Encoding: base64\r\n";
+    $message .= "\r\n";
+    $message .= chunk_split(base64_encode($body));
+    $message .= "\r\n.";
+
+    $send($message);
+    $dataResp = $read();
+
+    $send("QUIT");
+    fclose($socket);
+
+    return strpos($dataResp, '250') !== false;
 }
 
 function doReset($data){
