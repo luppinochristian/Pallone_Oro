@@ -27,7 +27,28 @@
         <button data-page="classifica">🏟️ Classifica</button>
         <button data-page="agente">🤝 Agente</button>
         <button data-page="notizie" id="nav-notizie">📰 Notizie</button>
-        <button id="logout-btn" class="btn-gold">Esci</button>
+
+        <!-- MENU A TENDINA ESCI -->
+        <div class="exit-dropdown-wrap" id="exit-dropdown-wrap">
+            <button id="exit-menu-btn" class="btn-gold" onclick="toggleExitMenu(event)">Esci ▾</button>
+            <div class="exit-dropdown" id="exit-dropdown">
+                <button class="exit-opt" onclick="goToCareerSelect()">
+                    <span>🏠</span>
+                    <div>
+                        <div class="exit-opt-title">Menu Principale</div>
+                        <div class="exit-opt-sub">Cambia carriera o creane una nuova</div>
+                    </div>
+                </button>
+                <div class="exit-dropdown-divider"></div>
+                <button class="exit-opt exit-opt-danger" onclick="doLogout()">
+                    <span>🚪</span>
+                    <div>
+                        <div class="exit-opt-title">Logout Completo</div>
+                        <div class="exit-opt-sub">Disconnetti account e torna al login</div>
+                    </div>
+                </button>
+            </div>
+        </div>
     </nav>
 </header>
 
@@ -109,7 +130,7 @@
       </div>
 
       <!-- CREA NUOVA CARRIERA -->
-      <div class="auth-box" id="create-career-box" style="display:none;max-width:700px">
+      <div class="auth-box" id="create-career-box" style="display:none;max-width:720px">
         <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px">
           <button onclick="showCareerSelect()" style="background:transparent;border:none;color:var(--text-dim);font-size:1.2rem;cursor:pointer">←</button>
           <h2 style="color:var(--gold);margin:0">Nuova Carriera</h2>
@@ -158,29 +179,11 @@
           <!-- Colonna destra: avatar + customizzazione -->
           <div>
             <!-- Anteprima Avatar SVG -->
-            <div style="text-align:center;margin-bottom:16px">
-              <div id="avatar-preview" style="width:120px;height:120px;margin:0 auto;border-radius:50%;overflow:hidden;border:3px solid var(--gold);background:var(--bg3)">
-                <!-- SVG generato via JS -->
-              </div>
+            <div style="text-align:center;margin-bottom:12px">
+              <div id="avatar-preview" style="width:110px;height:110px;margin:0 auto;border-radius:50%;overflow:hidden;border:3px solid var(--gold);background:var(--bg3)"></div>
             </div>
 
-            <div class="form-group">
-              <label>✂️ Acconciatura</label>
-              <select id="c-hair" onchange="updateAvatar()">
-                <option value="short_black">Corto Nero</option>
-                <option value="short_brown">Corto Castano</option>
-                <option value="short_blonde">Corto Biondo</option>
-                <option value="short_red">Corto Rosso</option>
-                <option value="long_black">Lungo Nero</option>
-                <option value="long_brown">Lungo Castano</option>
-                <option value="long_blonde">Lungo Biondo</option>
-                <option value="curly_black">Ricci Neri</option>
-                <option value="curly_brown">Ricci Castani</option>
-                <option value="afro_black">Afro Nero</option>
-                <option value="afro_brown">Afro Castano</option>
-                <option value="bald">Rasato</option>
-              </select>
-            </div>
+            <!-- CARNAGIONE -->
             <div class="form-group">
               <label>🎨 Carnagione</label>
               <div class="skin-picker" id="skin-picker">
@@ -191,6 +194,8 @@
                 <div class="skin-swatch"        data-val="dark"         style="background:#3B1A08" onclick="selectSkin('dark',this)"         title="Scura"></div>
               </div>
             </div>
+
+            <!-- COLORE OCCHI -->
             <div class="form-group">
               <label>👁️ Colore Occhi</label>
               <div class="eye-picker" id="eye-picker">
@@ -199,6 +204,14 @@
                 <div class="eye-swatch"        data-val="green" style="background:#228B22" onclick="selectEye('green',this)"  title="Verdi"></div>
                 <div class="eye-swatch"        data-val="hazel" style="background:#8B6914" onclick="selectEye('hazel',this)"  title="Nocciola"></div>
                 <div class="eye-swatch"        data-val="gray"  style="background:#708090" onclick="selectEye('gray',this)"   title="Grigi"></div>
+              </div>
+            </div>
+
+            <!-- ACCONCIATURA - PICKER VISIVO -->
+            <div class="form-group">
+              <label>✂️ Acconciatura</label>
+              <div class="hair-picker" id="hair-picker">
+                <!-- Riempito da JS -->
               </div>
             </div>
           </div>
@@ -211,13 +224,10 @@
     </div><!-- fine auth-container -->
   </div>
 </div>
-</div>
 
 <!-- ========== DASHBOARD PAGE ========== -->
 <div id="dashboard-page" class="page">
     <div style="padding:24px;max-width:1400px;margin:0 auto">
-
-        <!-- Hero -->
         <div class="player-hero">
             <div class="player-avatar">
                 <span id="player-avatar-icon">👦</span>
@@ -235,108 +245,45 @@
             </div>
         </div>
 
-        <!-- Info Cards -->
         <div class="info-cards">
-            <div class="info-card">
-                <div class="val" id="info-mese">-</div>
-                <div class="lbl">Periodo</div>
-            </div>
-            <div class="info-card">
-                <div class="val" id="info-soldi">-</div>
-                <div class="lbl">Soldi</div>
-            </div>
-            <div class="info-card">
-                <div class="val" id="info-gol">-</div>
-                <div class="lbl">Gol Carriera</div>
-            </div>
-            <div class="info-card">
-                <div class="val" id="info-assist">-</div>
-                <div class="lbl">Assist Carriera</div>
-            </div>
-            <div class="info-card">
-                <div class="val" id="info-palloni">-</div>
-                <div class="lbl">🏆 Palloni d'Oro</div>
-            </div>
-            <div class="info-card">
-                <div class="val" id="info-struttura">-</div>
-                <div class="lbl">Struttura</div>
-            </div>
+            <div class="info-card"><div class="val" id="info-mese">-</div><div class="lbl">Periodo</div></div>
+            <div class="info-card"><div class="val" id="info-soldi">-</div><div class="lbl">Soldi</div></div>
+            <div class="info-card"><div class="val" id="info-gol">-</div><div class="lbl">Gol Carriera</div></div>
+            <div class="info-card"><div class="val" id="info-assist">-</div><div class="lbl">Assist Carriera</div></div>
+            <div class="info-card"><div class="val" id="info-palloni">-</div><div class="lbl">🏆 Palloni d'Oro</div></div>
+            <div class="info-card"><div class="val" id="info-struttura">-</div><div class="lbl">Struttura</div></div>
         </div>
 
-        <!-- Layout principale: sinistra stats, destra notizie -->
         <div class="dashboard-main-layout">
-
-            <!-- COLONNA SINISTRA -->
             <div class="dashboard-left">
-                <!-- Obiettivi Stagionali -->
                 <div id="dashboard-obiettivi" style="margin-bottom:20px"></div>
-
-                <!-- Stats -->
                 <div class="stats-grid">
                     <div class="stat-card">
                         <h3>📊 Statistiche Tecniche</h3>
-                        <div class="stat-row" data-stat="tiro">
-                            <span class="stat-name">Tiro</span>
-                            <div class="stat-bar-bg"><div class="stat-bar" style="width:0%"></div></div>
-                            <span class="stat-value">0</span>
-                        </div>
-                        <div class="stat-row" data-stat="velocita">
-                            <span class="stat-name">Velocità</span>
-                            <div class="stat-bar-bg"><div class="stat-bar" style="width:0%"></div></div>
-                            <span class="stat-value">0</span>
-                        </div>
-                        <div class="stat-row" data-stat="dribbling">
-                            <span class="stat-name">Dribbling</span>
-                            <div class="stat-bar-bg"><div class="stat-bar" style="width:0%"></div></div>
-                            <span class="stat-value">0</span>
-                        </div>
-                        <div class="stat-row" data-stat="fisico">
-                            <span class="stat-name">Fisico</span>
-                            <div class="stat-bar-bg"><div class="stat-bar" style="width:0%"></div></div>
-                            <span class="stat-value">0</span>
-                        </div>
-                        <div class="stat-row" data-stat="mentalita">
-                            <span class="stat-name">Mentalità</span>
-                            <div class="stat-bar-bg"><div class="stat-bar" style="width:0%"></div></div>
-                            <span class="stat-value">0</span>
-                        </div>
+                        <div class="stat-row" data-stat="tiro"><span class="stat-name">Tiro</span><div class="stat-bar-bg"><div class="stat-bar" style="width:0%"></div></div><span class="stat-value">0</span></div>
+                        <div class="stat-row" data-stat="velocita"><span class="stat-name">Velocità</span><div class="stat-bar-bg"><div class="stat-bar" style="width:0%"></div></div><span class="stat-value">0</span></div>
+                        <div class="stat-row" data-stat="dribbling"><span class="stat-name">Dribbling</span><div class="stat-bar-bg"><div class="stat-bar" style="width:0%"></div></div><span class="stat-value">0</span></div>
+                        <div class="stat-row" data-stat="fisico"><span class="stat-name">Fisico</span><div class="stat-bar-bg"><div class="stat-bar" style="width:0%"></div></div><span class="stat-value">0</span></div>
+                        <div class="stat-row" data-stat="mentalita"><span class="stat-name">Mentalità</span><div class="stat-bar-bg"><div class="stat-bar" style="width:0%"></div></div><span class="stat-value">0</span></div>
                     </div>
                     <div class="stat-card">
                         <h3>🔋 Condizione Fisica</h3>
-                        <div class="stat-row bar-green" data-special="energia">
-                            <span class="stat-name">Energia</span>
-                            <div class="stat-bar-bg"><div class="stat-bar" style="width:0%"></div></div>
-                            <span class="stat-value">0</span>
-                        </div>
-                        <div class="stat-row bar-blue" data-special="morale">
-                            <span class="stat-name">Morale</span>
-                            <div class="stat-bar-bg"><div class="stat-bar" style="width:0%"></div></div>
-                            <span class="stat-value">0</span>
-                        </div>
-                        <div class="stat-row bar-purple" data-special="popolarita">
-                            <span class="stat-name">Popolarità</span>
-                            <div class="stat-bar-bg"><div class="stat-bar" style="width:0%"></div></div>
-                            <span class="stat-value">0</span>
-                        </div>
+                        <div class="stat-row bar-green" data-special="energia"><span class="stat-name">Energia</span><div class="stat-bar-bg"><div class="stat-bar" style="width:0%"></div></div><span class="stat-value">0</span></div>
+                        <div class="stat-row bar-blue" data-special="morale"><span class="stat-name">Morale</span><div class="stat-bar-bg"><div class="stat-bar" style="width:0%"></div></div><span class="stat-value">0</span></div>
+                        <div class="stat-row bar-purple" data-special="popolarita"><span class="stat-name">Popolarità</span><div class="stat-bar-bg"><div class="stat-bar" style="width:0%"></div></div><span class="stat-value">0</span></div>
                     </div>
                 </div>
             </div>
-
-            <!-- COLONNA DESTRA: Notizie -->
             <div class="dashboard-right">
                 <div class="dash-notizie-box">
                     <div class="dash-notizie-header">
                         <span>📰 Ultime Notizie</span>
                         <span id="dash-news-unread" class="news-badge" style="display:none"></span>
                     </div>
-                    <div id="dash-notizie-lista">
-                        <p style="color:var(--text-dim);font-size:0.82rem;padding:8px 0">Gioca il primo mese per ricevere notizie!</p>
-                    </div>
+                    <div id="dash-notizie-lista"><p style="color:var(--text-dim);font-size:0.82rem;padding:8px 0">Gioca il primo mese per ricevere notizie!</p></div>
                 </div>
             </div>
-
-        </div><!-- fine dashboard-main-layout -->
-
+        </div>
     </div>
 </div>
 
@@ -345,51 +292,30 @@
     <div id="game-page-inner" style="padding:24px;max-width:1400px;margin:0 auto">
         <div class="page-title">⚽ Gioca il <span>Mese</span></div>
         <p class="page-subtitle">Scegli fino a 3 azioni per questo mese, poi simula le partite</p>
-
-        <!-- Month indicator -->
         <div class="month-indicator">
             <div class="month-dots" id="month-dots"></div>
             <span id="current-month-text" style="font-size:0.9rem;color:var(--text-dim)"></span>
         </div>
-
         <div class="game-layout">
-            <!-- Actions -->
             <div class="actions-panel">
                 <h3>🎯 Scegli le tue Azioni</h3>
                 <p>Seleziona 1-3 azioni mensili. Le scelte influenzano stats, energia e performance in partita.</p>
                 <div class="actions-grid" id="actions-grid"></div>
                 <button class="play-btn" id="play-month-btn" disabled>⚽ Seleziona azioni</button>
             </div>
-
-            <!-- Sidebar -->
             <div class="game-sidebar">
                 <div class="sidebar-card">
                     <h4>📈 Status Attuale</h4>
                     <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-                        <div class="info-card" style="padding:12px">
-                            <div class="val" id="g-overall">-</div>
-                            <div class="lbl">Overall</div>
-                        </div>
-                        <div class="info-card" style="padding:12px">
-                            <div class="val" id="g-energia">-</div>
-                            <div class="lbl">Energia</div>
-                        </div>
-                        <div class="info-card" style="padding:12px">
-                            <div class="val" id="g-morale">-</div>
-                            <div class="lbl">Morale</div>
-                        </div>
-                        <div class="info-card" style="padding:12px">
-                            <div class="val" id="g-soldi">-</div>
-                            <div class="lbl">Soldi</div>
-                        </div>
+                        <div class="info-card" style="padding:12px"><div class="val" id="g-overall">-</div><div class="lbl">Overall</div></div>
+                        <div class="info-card" style="padding:12px"><div class="val" id="g-energia">-</div><div class="lbl">Energia</div></div>
+                        <div class="info-card" style="padding:12px"><div class="val" id="g-morale">-</div><div class="lbl">Morale</div></div>
+                        <div class="info-card" style="padding:12px"><div class="val" id="g-soldi">-</div><div class="lbl">Soldi</div></div>
                     </div>
                 </div>
-
                 <div class="sidebar-card">
                     <h4>📋 Ultime Attività</h4>
-                    <ul class="log-list" id="recent-log">
-                        <li class="log-item" style="color:var(--text-dim)">Caricamento...</li>
-                    </ul>
+                    <ul class="log-list" id="recent-log"><li class="log-item" style="color:var(--text-dim)">Caricamento...</li></ul>
                 </div>
             </div>
         </div>
@@ -401,21 +327,9 @@
     <div style="padding:24px;max-width:1200px;margin:0 auto">
         <div class="page-title">📊 <span>Carriera</span></div>
         <p class="page-subtitle">Storico delle tue stagioni e posizioni al Pallone d'Oro</p>
-
         <table class="season-table">
-            <thead>
-                <tr>
-                    <th>Stagione</th>
-                    <th>⚽ Gol</th>
-                    <th>🎯 Assist</th>
-                    <th>🏟️ Partite</th>
-                    <th>⭐ Media Voto</th>
-                    <th>🏆 Pallone d'Oro</th>
-                </tr>
-            </thead>
-            <tbody id="season-table-body">
-                <tr><td colspan="7" class="loading">Caricamento</td></tr>
-            </tbody>
+            <thead><tr><th>Stagione</th><th>⚽ Gol</th><th>🎯 Assist</th><th>🏟️ Partite</th><th>⭐ Media Voto</th><th>🏆 Pallone d'Oro</th></tr></thead>
+            <tbody id="season-table-body"><tr><td colspan="7" class="loading">Caricamento</td></tr></tbody>
         </table>
     </div>
 </div>
@@ -425,9 +339,7 @@
     <div style="padding:24px;max-width:1200px;margin:0 auto">
         <div class="page-title">🔄 <span>Trasferimento</span></div>
         <p class="page-subtitle">Scegli la tua prossima squadra. Squadre migliori = più soldi e visibilità!</p>
-        <div class="teams-grid" id="teams-grid">
-            <p class="loading">Caricamento squadre</p>
-        </div>
+        <div class="teams-grid" id="teams-grid"><p class="loading">Caricamento squadre</p></div>
     </div>
 </div>
 
@@ -436,9 +348,7 @@
     <div style="padding:24px;max-width:900px;margin:0 auto">
         <div class="page-title">🏗️ <span>Struttura Personale</span></div>
         <p class="page-subtitle">Investi i tuoi soldi per migliorare la tua struttura di allenamento e crescere più velocemente.</p>
-        <div id="strutture-container">
-            <p class="loading">Caricamento</p>
-        </div>
+        <div id="strutture-container"><p class="loading">Caricamento</p></div>
     </div>
 </div>
 
@@ -447,27 +357,16 @@
     <div style="padding:24px;max-width:1200px;margin:0 auto">
         <div class="page-title">🏟️ <span>Classifica</span></div>
         <p class="page-subtitle">Classifica in tempo reale di ogni lega e Champions Cup</p>
-
         <div class="classifica-tabs">
             <button class="class-tab active" onclick="switchClassTab('lega')">📋 Lega</button>
             <button class="class-tab" onclick="switchClassTab('champions')">🏆 Champions Cup</button>
         </div>
-
-        <!-- TAB LEGA -->
         <div id="class-tab-lega">
-            <div class="lega-filters" id="classifica-lega-filters">
-                <p class="loading">Caricamento leghe...</p>
-            </div>
-            <div id="classifica-table-wrap">
-                <p class="loading">Seleziona una lega</p>
-            </div>
+            <div class="lega-filters" id="classifica-lega-filters"><p class="loading">Caricamento leghe...</p></div>
+            <div id="classifica-table-wrap"><p class="loading">Seleziona una lega</p></div>
         </div>
-
-        <!-- TAB CHAMPIONS -->
         <div id="class-tab-champions" style="display:none">
-            <div id="champions-wrap">
-                <p class="loading">Caricamento Champions Cup...</p>
-            </div>
+            <div id="champions-wrap"><p class="loading">Caricamento Champions Cup...</p></div>
         </div>
     </div>
 </div>
