@@ -1,0 +1,392 @@
+/**
+ * Golden Striker — Career Charts
+ * Canvas-based charts for career statistics visualization
+ */
+
+const GS_Charts = (() => {
+    const GOLD   = '#FFD700';
+    const GREEN  = '#10b981';
+    const BLUE   = '#3b82f6';
+    const PURPLE = '#8b5cf6';
+    const RED    = '#ef4444';
+    const DIM    = '#94a3b8';
+    const BG3    = '#1f2937';
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+    function getCanvas(id, w, h) {
+        let c = document.getElementById(id);
+        if (!c) {
+            c = document.createElement('canvas');
+            c.id = id;
+        }
+        const dpr = window.devicePixelRatio || 1;
+        const cssW = w || c.parentElement?.offsetWidth || 400;
+        const cssH = h || 200;
+        c.width  = Math.round(cssW * dpr);
+        c.height = Math.round(cssH * dpr);
+        c.style.width  = cssW + 'px';
+        c.style.height = cssH + 'px';
+        const ctx = c.getContext('2d');
+        if (ctx) ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        return c;
+    }
+
+    function roundRect(ctx, x, y, w, h, r) {
+        r = Math.min(r, w / 2, h / 2);
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.lineTo(x + w - r, y);
+        ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+        ctx.lineTo(x + w, y + h - r);
+        ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        ctx.lineTo(x + r, y + h);
+        ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+        ctx.lineTo(x, y + r);
+        ctx.quadraticCurveTo(x, y, x + r, y);
+        ctx.closePath();
+    }
+
+    // ── Bar Chart ─────────────────────────────────────────────────────────────
+    function barChart(container, data, opts = {}) {
+        const _bW = container.offsetWidth, _bH = opts.height || 220;
+        const canvas = getCanvas(opts.id || 'gs-bar-chart', _bW, _bH);
+        container.appendChild(canvas);
+        const ctx = canvas.getContext('2d');
+        const W = _bW, H = _bH;
+        const pad = { top: 30, right: 20, bottom: 50, left: 45 };
+        const chartW = W - pad.left - pad.right;
+        const chartH = H - pad.top - pad.bottom;
+
+        ctx.clearRect(0, 0, W, H);
+
+        if (!data || !data.length) {
+            ctx.fillStyle = DIM;
+            ctx.font = '14px system-ui';
+            ctx.textAlign = 'center';
+            ctx.fillText('No data yet', W / 2, H / 2);
+            return canvas;
+        }
+
+        const maxVal = Math.max(...data.map(d => d.value), 1);
+        const colors = opts.colors || [GOLD, GREEN, BLUE, PURPLE, RED];
+        const barW = Math.min(chartW / data.length * 0.6, 60);
+        const gap  = chartW / data.length;
+
+        // Grid lines
+        ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= 4; i++) {
+            const y = pad.top + (chartH * i) / 4;
+            ctx.beginPath();
+            ctx.moveTo(pad.left, y);
+            ctx.lineTo(W - pad.right, y);
+            ctx.stroke();
+
+            // Y-axis labels
+            const val = Math.round(maxVal * (4 - i) / 4);
+            ctx.fillStyle = DIM;
+            ctx.font = '11px system-ui';
+            ctx.textAlign = 'right';
+            ctx.fillText(val, pad.left - 6, y + 4);
+        }
+
+        // Bars
+        data.forEach((d, i) => {
+            const barH = (d.value / maxVal) * chartH;
+            const x = pad.left + gap * i + (gap - barW) / 2;
+            const y = pad.top + chartH - barH;
+            const color = d.color || colors[i % colors.length];
+
+            // Shadow glow
+            ctx.shadowColor = color;
+            ctx.shadowBlur  = 8;
+
+            // Gradient fill
+            const grad = ctx.createLinearGradient(x, y, x, y + barH);
+            grad.addColorStop(0, color);
+            grad.addColorStop(1, color + '44');
+            ctx.fillStyle = grad;
+            roundRect(ctx, x, y, barW, barH, 4);
+            ctx.fill();
+
+            ctx.shadowBlur = 0;
+
+            // Value label
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 12px system-ui';
+            ctx.textAlign = 'center';
+            ctx.fillText(d.value, x + barW / 2, y - 6);
+
+            // X label
+            ctx.fillStyle = DIM;
+            ctx.font = '11px system-ui';
+            const label = d.label || `${i + 1}`;
+            const maxLabelW = gap - 4;
+            ctx.save();
+            ctx.translate(x + barW / 2, pad.top + chartH + 14);
+            if (label.length > 6) {
+                ctx.rotate(-0.5);
+                ctx.textAlign = 'right';
+            }
+            ctx.fillText(label.length > 8 ? label.slice(0, 7) + '…' : label, 0, 0);
+            ctx.restore();
+        });
+
+        // Title
+        if (opts.title) {
+            ctx.fillStyle = GOLD;
+            ctx.font = 'bold 13px system-ui';
+            ctx.textAlign = 'left';
+            ctx.fillText(opts.title, pad.left, 18);
+        }
+
+        return canvas;
+    }
+
+    // ── Line Chart ────────────────────────────────────────────────────────────
+    function lineChart(container, datasets, opts = {}) {
+        const _lW = container.offsetWidth, _lH = opts.height || 220;
+        const canvas = getCanvas(opts.id || 'gs-line-chart', _lW, _lH);
+        container.appendChild(canvas);
+        const ctx = canvas.getContext('2d');
+        const W = _lW, H = _lH;
+        const pad = { top: 30, right: 20, bottom: 45, left: 45 };
+        const chartW = W - pad.left - pad.right;
+        const chartH = H - pad.top - pad.bottom;
+
+        ctx.clearRect(0, 0, W, H);
+
+        const allVals = datasets.flatMap(ds => ds.data);
+        if (!allVals.length) return canvas;
+
+        const maxVal = Math.max(...allVals, 1);
+        const minVal = Math.min(...allVals, 0);
+        const range  = maxVal - minVal || 1;
+        const colors = opts.colors || [GOLD, GREEN, BLUE, PURPLE];
+        const labels = opts.labels || datasets[0].data.map((_, i) => `${i + 1}`);
+        const n = datasets[0].data.length;
+
+        // Grid
+        ctx.strokeStyle = 'rgba(255,255,255,0.06)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i <= 4; i++) {
+            const y = pad.top + (chartH * i) / 4;
+            ctx.beginPath();
+            ctx.moveTo(pad.left, y);
+            ctx.lineTo(W - pad.right, y);
+            ctx.stroke();
+            const val = Math.round(minVal + range * (4 - i) / 4);
+            ctx.fillStyle = DIM;
+            ctx.font = '11px system-ui';
+            ctx.textAlign = 'right';
+            ctx.fillText(val, pad.left - 6, y + 4);
+        }
+
+        // Lines
+        datasets.forEach((ds, di) => {
+            const color = ds.color || colors[di % colors.length];
+            ctx.beginPath();
+            ds.data.forEach((val, i) => {
+                const x = pad.left + (chartW * i) / Math.max(n - 1, 1);
+                const y = pad.top + chartH - ((val - minVal) / range) * chartH;
+                i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+            });
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2.5;
+            ctx.shadowColor = color;
+            ctx.shadowBlur  = 6;
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+
+            // Area fill
+            ctx.beginPath();
+            ds.data.forEach((val, i) => {
+                const x = pad.left + (chartW * i) / Math.max(n - 1, 1);
+                const y = pad.top + chartH - ((val - minVal) / range) * chartH;
+                i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+            });
+            ctx.lineTo(pad.left + chartW, pad.top + chartH);
+            ctx.lineTo(pad.left, pad.top + chartH);
+            ctx.closePath();
+            const grad = ctx.createLinearGradient(0, pad.top, 0, pad.top + chartH);
+            grad.addColorStop(0, color + '44');
+            grad.addColorStop(1, color + '00');
+            ctx.fillStyle = grad;
+            ctx.fill();
+
+            // Dots
+            ds.data.forEach((val, i) => {
+                const x = pad.left + (chartW * i) / Math.max(n - 1, 1);
+                const y = pad.top + chartH - ((val - minVal) / range) * chartH;
+                ctx.beginPath();
+                ctx.arc(x, y, 4, 0, Math.PI * 2);
+                ctx.fillStyle = color;
+                ctx.shadowColor = color;
+                ctx.shadowBlur  = 8;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+            });
+        });
+
+        // X labels
+        labels.forEach((label, i) => {
+            const x = pad.left + (chartW * i) / Math.max(n - 1, 1);
+            ctx.fillStyle = DIM;
+            ctx.font = '11px system-ui';
+            ctx.textAlign = 'center';
+            ctx.fillText(label, x, H - 8);
+        });
+
+        // Legend
+        datasets.forEach((ds, di) => {
+            if (!ds.label) return;
+            const color = ds.color || colors[di % colors.length];
+            const lx = pad.left + di * 100;
+            ctx.fillStyle = color;
+            ctx.fillRect(lx, 8, 16, 3);
+            ctx.fillStyle = '#fff';
+            ctx.font = '11px system-ui';
+            ctx.textAlign = 'left';
+            ctx.fillText(ds.label, lx + 20, 14);
+        });
+
+        if (opts.title) {
+            ctx.fillStyle = GOLD;
+            ctx.font = 'bold 13px system-ui';
+            ctx.textAlign = 'right';
+            ctx.fillText(opts.title, W - pad.right, 18);
+        }
+
+        return canvas;
+    }
+
+    // ── Radar Chart ───────────────────────────────────────────────────────────
+    function radarChart(container, stats, opts = {}) {
+        const size = opts.size || 220;
+        const canvas = getCanvas(opts.id || 'gs-radar-chart', size, size);
+        container.appendChild(canvas);
+        const ctx = canvas.getContext('2d');
+        // Use CSS size for layout math (DPR scaling handled by setTransform in getCanvas)
+        const W = size, H = size;
+        const cx = W / 2, cy = H / 2;
+        const r  = Math.min(W, H) * 0.38;
+
+        ctx.clearRect(0, 0, W, H);
+
+        const keys   = Object.keys(stats);
+        const values = Object.values(stats);
+        const maxVal = opts.max || 125;
+        const n      = keys.length;
+
+        // Draw web
+        for (let ring = 1; ring <= 5; ring++) {
+            ctx.beginPath();
+            for (let i = 0; i < n; i++) {
+                const angle = (2 * Math.PI * i) / n - Math.PI / 2;
+                const rr = (r * ring) / 5;
+                i === 0
+                    ? ctx.moveTo(cx + Math.cos(angle) * rr, cy + Math.sin(angle) * rr)
+                    : ctx.lineTo(cx + Math.cos(angle) * rr, cy + Math.sin(angle) * rr);
+            }
+            ctx.closePath();
+            ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        }
+
+        // Axes
+        for (let i = 0; i < n; i++) {
+            const angle = (2 * Math.PI * i) / n - Math.PI / 2;
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.lineTo(cx + Math.cos(angle) * r, cy + Math.sin(angle) * r);
+            ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        }
+
+        // Data polygon
+        ctx.beginPath();
+        for (let i = 0; i < n; i++) {
+            const angle = (2 * Math.PI * i) / n - Math.PI / 2;
+            const val = Math.min(values[i], maxVal) / maxVal;
+            const rr = r * val;
+            i === 0
+                ? ctx.moveTo(cx + Math.cos(angle) * rr, cy + Math.sin(angle) * rr)
+                : ctx.lineTo(cx + Math.cos(angle) * rr, cy + Math.sin(angle) * rr);
+        }
+        ctx.closePath();
+        const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+        grad.addColorStop(0, GOLD + 'aa');
+        grad.addColorStop(1, GOLD + '22');
+        ctx.fillStyle = grad;
+        ctx.fill();
+        ctx.strokeStyle = GOLD;
+        ctx.lineWidth = 2;
+        ctx.shadowColor = GOLD;
+        ctx.shadowBlur  = 8;
+        ctx.stroke();
+        ctx.shadowBlur = 0;
+
+        // Dots
+        for (let i = 0; i < n; i++) {
+            const angle = (2 * Math.PI * i) / n - Math.PI / 2;
+            const val = Math.min(values[i], maxVal) / maxVal;
+            const rr = r * val;
+            ctx.beginPath();
+            ctx.arc(cx + Math.cos(angle) * rr, cy + Math.sin(angle) * rr, 4, 0, Math.PI * 2);
+            ctx.fillStyle = GOLD;
+            ctx.shadowColor = GOLD;
+            ctx.shadowBlur  = 10;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+        }
+
+        // Labels
+        for (let i = 0; i < n; i++) {
+            const angle = (2 * Math.PI * i) / n - Math.PI / 2;
+            const lx = cx + Math.cos(angle) * (r + 20);
+            const ly = cy + Math.sin(angle) * (r + 16);
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 12px system-ui';
+            ctx.textAlign = Math.cos(angle) > 0.1 ? 'left' : Math.cos(angle) < -0.1 ? 'right' : 'center';
+            ctx.fillText(keys[i], lx, ly);
+            ctx.fillStyle = DIM;
+            ctx.font = '10px system-ui';
+            ctx.fillText(values[i], lx, ly + 13);
+        }
+
+        return canvas;
+    }
+
+    // ── Animated number counter ───────────────────────────────────────────────
+    function animateNumber(el, from, to, duration = 800, suffix = '') {
+        const start = performance.now();
+        function tick(now) {
+            const elapsed = now - start;
+            const progress = Math.min(elapsed / duration, 1);
+            // Ease out cubic
+            const ease = 1 - Math.pow(1 - progress, 3);
+            el.textContent = Math.round(from + (to - from) * ease) + suffix;
+            if (progress < 1) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+    }
+
+    // ── Stat bar animation ────────────────────────────────────────────────────
+    function animateStatBar(barEl, from, to, max = 125, duration = 600) {
+        const start = performance.now();
+        function tick(now) {
+            const progress = Math.min((now - start) / duration, 1);
+            const ease = 1 - Math.pow(1 - progress, 3);
+            const val = from + (to - from) * ease;
+            barEl.style.width = `${(val / max) * 100}%`;
+            if (progress < 1) requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+    }
+
+    return { barChart, lineChart, radarChart, animateNumber, animateStatBar };
+})();
+
+window.GS_Charts = GS_Charts;
