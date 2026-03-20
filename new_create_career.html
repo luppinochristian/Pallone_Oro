@@ -1,0 +1,205 @@
+      <!-- CREA NUOVA CARRIERA — Wizard 4 Step -->
+      <div id="create-career-box" style="display:none">
+        <div class="cc-wizard">
+
+          <!-- Progress bar -->
+          <div class="cc-progress">
+            <div class="cc-step-pill active" id="pill-1">1</div>
+            <div class="cc-step-line" id="line-1-2"></div>
+            <div class="cc-step-pill" id="pill-2">2</div>
+            <div class="cc-step-line" id="line-2-3"></div>
+            <div class="cc-step-pill" id="pill-3">3</div>
+            <div class="cc-step-line" id="line-3-4"></div>
+            <div class="cc-step-pill" id="pill-4">4</div>
+          </div>
+          <div class="cc-step-labels">
+            <span data-i18n="cc_step1">Identità</span>
+            <span data-i18n="cc_step2">Aspetto</span>
+            <span data-i18n="cc_step3">Stile</span>
+            <span data-i18n="cc_step4">Conferma</span>
+          </div>
+
+          <!-- STEP 1: Identità -->
+          <div class="cc-panel active" id="cc-step-1">
+            <div class="cc-panel-header">
+              <div class="cc-panel-icon">⚽</div>
+              <div>
+                <h3 data-i18n="cc_step1_title">Chi sei?</h3>
+                <p data-i18n="cc_step1_sub">Il tuo nome entrerà nella storia del calcio</p>
+              </div>
+            </div>
+
+            <div class="cc-fields">
+              <div class="cc-field">
+                <label data-i18n="create_name_label">Nome Carriera</label>
+                <input type="text" id="c-career-name" placeholder="es. La mia prima carriera" maxlength="40">
+              </div>
+              <div class="cc-field">
+                <label data-i18n="create_player_label">Nome Calciatore</label>
+                <input type="text" id="c-name" placeholder="es. Marco Rossi" maxlength="30">
+              </div>
+
+              <div class="cc-field-row">
+                <div class="cc-field">
+                  <label data-i18n="create_gender">Sesso</label>
+                  <div class="cc-toggle-group" id="gender-toggle">
+                    <button type="button" class="cc-toggle active" data-val="male" onclick="ccSetGender('male')" data-i18n="gender_male">⚽ Maschio</button>
+                    <button type="button" class="cc-toggle" data-val="female" onclick="ccSetGender('female')" data-i18n="gender_female">⚽ Femmina</button>
+                  </div>
+                </div>
+                <div class="cc-field">
+                  <label data-i18n="create_age">Età di inizio</label>
+                  <div class="cc-age-selector">
+                    <button type="button" onclick="ccAgeStep(-1)">−</button>
+                    <span id="c-age-display">17</span>
+                    <button type="button" onclick="ccAgeStep(1)">+</button>
+                    <input type="hidden" id="c-age" value="17">
+                  </div>
+                </div>
+              </div>
+
+              <div class="cc-field">
+                <label data-i18n="create_nationality">Nazionalità</label>
+                <div class="cc-nation-search-wrap">
+                  <input type="text" id="cc-nation-search" placeholder="🔍 Cerca nazione..." oninput="ccFilterNations(this.value)" autocomplete="off">
+                </div>
+                <div class="cc-nation-scroll" id="cc-nation-list"></div>
+                <input type="hidden" id="c-nationality" value="Italy">
+              </div>
+            </div>
+
+            <div class="cc-nav">
+              <button type="button" class="cc-btn-back" onclick="showCareerSelectBack()" data-i18n="cc_back">← Indietro</button>
+              <button type="button" class="cc-btn-next" onclick="ccNextStep(1)" data-i18n="cc_next">Avanti →</button>
+            </div>
+          </div>
+
+          <!-- STEP 2: Aspetto -->
+          <div class="cc-panel" id="cc-step-2">
+            <div class="cc-panel-header">
+              <div class="cc-panel-icon">🧑</div>
+              <div>
+                <h3 data-i18n="cc_step2_title">Il tuo aspetto</h3>
+                <p data-i18n="cc_step2_sub">Personalizza il tuo calciatore</p>
+              </div>
+            </div>
+
+            <div class="cc-appearance">
+              <!-- Avatar preview -->
+              <div class="cc-avatar-col">
+                <div class="cc-avatar-ring">
+                  <div id="avatar-preview" style="width:130px;height:130px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center"></div>
+                </div>
+                <div class="cc-avatar-modes">
+                  <button type="button" class="cc-mode-btn active" id="btn-mode-default" onclick="setAvatarMode('default')">🎨 SVG</button>
+                  <button type="button" class="cc-mode-btn" id="btn-mode-ai" onclick="setAvatarMode('ai')">✨ AI</button>
+                </div>
+              </div>
+
+              <!-- Controls -->
+              <div class="cc-appearance-controls">
+                <!-- Default mode -->
+                <div id="avatar-default-panel">
+                  <div class="cc-field">
+                    <label data-i18n="create_skin">Carnagione</label>
+                    <div class="skin-tone-row" id="skin-tone-picker"></div>
+                  </div>
+                  <div class="cc-field">
+                    <label data-i18n="create_hairstyle">Capelli</label>
+                    <div class="hair-style-picker" id="hair-style-picker"></div>
+                  </div>
+                  <div class="cc-field" id="hair-color-group">
+                    <label data-i18n="create_haircolor">Colore Capelli</label>
+                    <div class="hair-color-row" id="hair-color-picker"></div>
+                  </div>
+                  <div class="cc-field">
+                    <label data-i18n="create_eyes">Occhi</label>
+                    <div class="eye-picker-outer" id="eye-picker-wrap"></div>
+                  </div>
+                </div>
+                <!-- AI mode -->
+                <div id="avatar-ai-panel" style="display:none">
+                  <div class="cc-field">
+                    <label data-i18n="ai_describe_label">✨ Descrivi il tuo calciatore</label>
+                    <textarea id="ai-avatar-prompt" rows="3"
+                      placeholder="es: capelli ricci neri, occhi verdi, carnagione scura"
+                      style="width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-size:0.84rem;resize:none;font-family:inherit;box-sizing:border-box"
+                      onfocus="this.style.borderColor='var(--gold)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+                    <button type="button" id="ai-generate-btn" onclick="generateAIAvatar()" class="btn-primary" style="width:100%;margin-top:8px;font-size:0.85rem" data-i18n="ai_generate_btn">🎨 Genera</button>
+                    <p id="ai-status" style="font-size:0.72rem;color:var(--text-dim);text-align:center;margin-top:6px"></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="cc-nav">
+              <button type="button" class="cc-btn-back" onclick="ccGoStep(1)" data-i18n="cc_back">← Indietro</button>
+              <button type="button" class="cc-btn-next" onclick="ccNextStep(2)" data-i18n="cc_next">Avanti →</button>
+            </div>
+          </div>
+
+          <!-- STEP 3: Stile di gioco -->
+          <div class="cc-panel" id="cc-step-3">
+            <div class="cc-panel-header">
+              <div class="cc-panel-icon">🦶</div>
+              <div>
+                <h3 data-i18n="cc_step3_title">Il tuo stile</h3>
+                <p data-i18n="cc_step3_sub">Come giochi in campo?</p>
+              </div>
+            </div>
+
+            <div class="cc-fields">
+              <div class="cc-field">
+                <label data-i18n="create_foot">Piede Preferito</label>
+                <div class="cc-toggle-group" id="foot-toggle">
+                  <button type="button" class="cc-toggle active" data-val="dx" onclick="ccSetFoot('dx')" data-i18n="foot_right">👟 Destro</button>
+                  <button type="button" class="cc-toggle" data-val="sx" onclick="ccSetFoot('sx')" data-i18n="foot_left">👟 Sinistro</button>
+                </div>
+                <input type="hidden" id="c-piede-preferito" value="dx">
+              </div>
+
+              <div class="cc-field">
+                <label data-i18n="cc_role">Ruolo / Specializzazione</label>
+                <p class="cc-field-hint" data-i18n="cc_role_hint">+5 alla stat principale a inizio carriera</p>
+                <div class="cc-role-grid" id="cc-role-grid"></div>
+                <input type="hidden" id="c-role" value="bomber">
+              </div>
+            </div>
+
+            <div class="cc-nav">
+              <button type="button" class="cc-btn-back" onclick="ccGoStep(2)" data-i18n="cc_back">← Indietro</button>
+              <button type="button" class="cc-btn-next" onclick="ccNextStep(3)" data-i18n="cc_next">Avanti →</button>
+            </div>
+          </div>
+
+          <!-- STEP 4: Conferma -->
+          <div class="cc-panel" id="cc-step-4">
+            <div class="cc-panel-header">
+              <div class="cc-panel-icon">🌟</div>
+              <div>
+                <h3 data-i18n="cc_step4_title">Pronto per la gloria?</h3>
+                <p data-i18n="cc_step4_sub">Controlla i tuoi dettagli e inizia</p>
+              </div>
+            </div>
+
+            <!-- Summary card -->
+            <div class="cc-summary-card">
+              <div class="cc-summary-avatar" id="cc-summary-avatar"></div>
+              <div class="cc-summary-info">
+                <div class="cc-summary-name" id="cc-summary-name">—</div>
+                <div class="cc-summary-career" id="cc-summary-career">—</div>
+                <div class="cc-summary-tags" id="cc-summary-tags"></div>
+              </div>
+            </div>
+
+            <p class="error-msg" id="create-error" style="margin:8px 0 0"></p>
+
+            <div class="cc-nav cc-nav-final">
+              <button type="button" class="cc-btn-back" onclick="ccGoStep(3)" data-i18n="cc_back">← Indietro</button>
+              <button type="button" class="cc-btn-start" onclick="doCreateCareer()" data-i18n="create_start_btn">🌟 Inizia la Carriera!</button>
+            </div>
+          </div>
+
+        </div><!-- cc-wizard -->
+      </div><!-- create-career-box -->
+
