@@ -30,12 +30,12 @@ Con un account registrato puoi avere **più carriere simultanee** .
 
 Dopo il login scegli **"Nuova Carriera"**. Ti verrà chiesto di:
 
-1. **Scegliere un nome** per il tuo calciatore
-2. **Selezionare il ruolo** (attaccante, centrocampista, difensore, portiere)
-3. **Scegliere la squadra iniziale** — puoi partire da un club di bassa lega per la sfida, o da una big per puntare subito in alto
-4. **Personalizzare l'aspetto** del tuo avatar
+1. **Scegliere un nome** per il tuo calciatore e per la carriera
+2. **Scegliere la propria nazionalità** per il tuo calciatore/calciatrice.
+3. **Personalizzare l'aspetto** del tuo avatar anche tramite ai
+4. **Scegli la tua specializzazione** come attaccante, sei un attaccante con fisico o con tecnica?
 
-Il giocatore parte con statistiche basse (overall ~30-40). La crescita dipende interamente dalle tue scelte.
+Il giocatore parte con statistiche basse . La crescita dipende interamente dalle tue scelte.
 
 ---
 
@@ -85,7 +85,7 @@ Il tuo giocatore ha **7 statistiche**:
 
 L'**overall** è la media pesata dei primi 5 attributi, moltiplicata per bonus di struttura, agente e abilità. Va da **30** (esordiente) a **99** (leggenda).
 
----
+**Non dimenticarti la tua card**, si, proprio come scritto, avrai la possibilità di scaricare la tua card schiacciando card + download, card che cambia in base al tuo overall.
 
 ### 5. Strutture di allenamento e Albero delle Abilità
 
