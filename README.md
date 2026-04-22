@@ -2,43 +2,6 @@
 
 > *Costruisci la carriera del tuo calciatore ideale, scala le leghe mondiali e conquista il Pallone d'Oro.*
 
----
-
-## 🚀 Avvio rapido
-
-### Prerequisiti
-
-- **PHP 8.0+** con le estensioni: `pdo_sqlite`, `sqlite3`, `mbstring`, `openssl`
-- Nessun database esterno, nessun `npm`, nessun build step
-
-### Comando per avviare
-
-```bash
-cd Pallone_Oro-fixed
-php -S localhost:8080 router.php
-```
-
-Poi apri il browser su **http://localhost:8080** — il gioco è pronto.
-
-> **Nota:** al primo avvio il database SQLite viene creato automaticamente in `backend/data/db.sqlite` con tutte le tabelle, le squadre e le leghe precaricate. Non serve eseguire nessun SQL manualmente.
-
-### Variabili d'ambiente opzionali
-
-| Variabile | Default | Descrizione |
-|---|---|---|
-| `GMAIL_FROM` | `goldenstrikerreset@gmail.com` | Indirizzo mittente email |
-| `GMAIL_PASS` | *(app password inclusa)* | Password applicazione Gmail |
-| `GMAIL_NAME` | `Golden Striker` | Nome visualizzato mittente |
-| `ANTHROPIC_API_KEY` | — | Chiave API per traduzione notizie e avatar AI |
-
-```bash
-GMAIL_FROM=tua@email.com GMAIL_PASS=xxxx php -S localhost:8080 router.php
-```
-
-Senza `ANTHROPIC_API_KEY` il gioco funziona normalmente: le notizie rimangono in italiano anche se la lingua è impostata su inglese.
-
----
-
 ## 🎮 Cos'è Golden Striker
 
 Golden Striker è un **simulatore di carriera calcistica single-player** con interfaccia web. Non è un gioco di squadra, non è un fantasy: sei tu il calciatore. Crei il tuo avatar, scegli una squadra di partenza e avanzi mese dopo mese prendendo decisioni su allenamento, trasferimenti, gestione dell'agente e vita fuori dal campo.
