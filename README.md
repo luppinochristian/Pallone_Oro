@@ -4,7 +4,7 @@
 
 ## 🎮 Cos'è Golden Striker
 
-Golden Striker è un **simulatore di carriera calcistica single-player** con interfaccia web. Non è un gioco di squadra, non è un fantasy: sei tu il calciatore. Crei il tuo avatar, scegli una squadra di partenza e avanzi mese dopo mese prendendo decisioni su allenamento, trasferimenti, gestione dell'agente e vita fuori dal campo.
+Golden Striker è un **simulatore di carriera calcistica single-player** con interfaccia web. Non è un gioco di squadra, non è un fantasy: sei tu il calciatore. Crei il tuo avatar, partirai da una squadra di seconda lega e avanza mese dopo mese prendendo decisioni su allenamento, trasferimenti, gestione dell'agente e vita fuori dal campo.
 
 L'obiettivo è uno solo: conquistare il **Pallone d'Oro** — il massimo riconoscimento calcistico mondiale.
 
@@ -22,7 +22,7 @@ Dalla schermata iniziale puoi:
 - **Accedere** se hai già un account
 - **Giocare come ospite** senza registrarti (i dati rimangono in memoria, non vengono salvati)
 
-Con un account registrato puoi avere **più carriere simultanee** e accedere alla **classifica globale**.
+Con un account registrato puoi avere **più carriere simultanee** .
 
 ---
 
