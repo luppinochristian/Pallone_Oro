@@ -1,0 +1,47 @@
+# Avvio:  docker compose up --build
+# Nessun file .env: le impostazioni sono qui sotto, con valori di sviluppo.
+# Per un deploy pubblico cambia le password del database e non committare segreti.
+services:
+
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: golden_root_dev
+      MYSQL_DATABASE: golden_striker
+      MYSQL_USER: gs_user
+      MYSQL_PASSWORD: gs_password
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      # $$ evita che la variabile venga espansa dall'host: la legge dal container
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u $$MYSQL_USER -p$$MYSQL_PASSWORD"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - .:/app
+    environment:
+      MYSQL_HOST: db
+      MYSQL_PORT: 3306
+      MYSQL_DB: golden_striker
+      MYSQL_USER: gs_user
+      MYSQL_PASS: gs_password
+      # Facoltativi: servono solo per l'invio delle email (registrazione e reset password).
+      # Se vuoi usarli, impostali nell'ambiente della shell prima di avviare Compose.
+      APP_URL: ${APP_URL:-http://localhost:8080}
+      GMAIL_FROM: ${GMAIL_FROM:-}
+      GMAIL_PASS: ${GMAIL_PASS:-}
+      GMAIL_NAME: ${GMAIL_NAME:-Golden Striker}
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  mysql_data:
